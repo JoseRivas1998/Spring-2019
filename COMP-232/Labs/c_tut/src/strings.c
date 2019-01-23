@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: c_tut
+* Date: 01/23/19
+**/
 #include <stdio.h>
 
 int main(void)

@@ -1,0 +1,18 @@
+Jose de Jesus Rodriguez Rivas
+1 abcdefghijklmnopqrst
+3 123.34 23.12345 5439.234 0.000231
+4 aaaaa bbbbb ccccc ddddd eeeee
+2 123 45 6 7890 87592
+END
+TYPE 1: abcdefghijklmnopqrst
+TYPE 3: 123.340000/23.123450/5439.234000/0.000231
+TYPE 4: aaaaa bbbbb ccccc ddddd eeeee
+TYPE 2: 123,45,6,7890,87592
+Number of message batches: 1
+Messages processed:
+Total: 4
+Type 1: 1
+Type 2: 1
+Type 3: 1
+Type 4: 1
+

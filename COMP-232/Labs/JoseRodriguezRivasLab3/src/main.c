@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 3
+* Date: 02/13/19
+**/
 #include "person.h"
 
 #define DEF_NUM    1

@@ -1,0 +1,101 @@
+Jose de Jesus Rodriugez Rivas
+/home/joserivas1998/Code/Spring-2019/COMP-232/Labs/JoseRodriguezRivasLab3/cmake-build-debug/personnel
+Enter the initial number of records:
+7
+Zach 22 5.8 2/20/1989
+Maya 21 5.9 8/2/1990
+Ange 23 5.6 7/3/1987
+Greg 22 6.2 4/15/1989
+Matt 24 6.5 6/5/1986
+Bob 50 8 3/23/1900
+Frank 100 9 5/4/1923Enter the next person's name:
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Enter the next person's name:
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Enter the next person's name:
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Enter the next person's name:
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Enter the next person's name:
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Enter the next person's name:
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Enter the next person's name:
+
+
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Zach 22 5.8 2/20/1989
+Maya 21 5.9 8/2/1990
+Ange 23 5.6 7/3/1987
+Greg 22 6.2 4/15/1989
+Matt 24 6.5 6/5/1986
+Bob 50 8.0 3/23/1900
+Frank 100 9.0 5/4/1923
+
+--> Searching database for Maya
+Maya 21 5.9 8/2/1990
+
+--> Removing Maya from database
+Zach 22 5.8 2/20/1989
+Ange 23 5.6 7/3/1987
+Greg 22 6.2 4/15/1989
+Matt 24 6.5 6/5/1986
+Bob 50 8.0 3/23/1900
+Frank 100 9.0 5/4/1923
+
+--> Searching database for Frank
+Frank 100 9.0 5/4/1923
+
+--> Removing Frank from database
+Zach 22 5.8 2/20/1989
+Ange 23 5.6 7/3/1987
+Greg 22 6.2 4/15/1989
+Matt 24 6.5 6/5/1986
+Bob 50 8.0 3/23/1900
+
+--> Removing Miro from database
+Zach 22 5.8 2/20/1989
+Ange 23 5.6 7/3/1987
+Greg 22 6.2 4/15/1989
+Matt 24 6.5 6/5/1986
+Bob 50 8.0 3/23/1900
+
+--> Adding new record to database
+Enter the next person's name:
+AJ 99 88 1/1/1919
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+Zach 22 5.8 2/20/1989
+Ange 23 5.6 7/3/1987
+Greg 22 6.2 4/15/1989
+Matt 24 6.5 6/5/1986
+Bob 50 8.0 3/23/1900
+AJ 99 88.0 1/1/1919
+
+--> Clearing database
+
+--> Adding new record to database
+Enter the next person's name:
+AJ 99 88 1/1/1919
+Enter their age:
+Enter their height
+Enter their date of birth (MM/DD/YYYY)
+AJ 99 88.0 1/1/1919
+
+Process finished with exit code 0
+

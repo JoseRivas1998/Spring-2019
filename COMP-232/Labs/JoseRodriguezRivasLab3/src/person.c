@@ -9,8 +9,16 @@ LIST *head = NULL, *tail = NULL;
 
 void inputPersonalData(PERSON *person) {
     // TODO Implement the function
-    puts("Enter a person with the following format: [name] [age] [height] [birthMonth]/[birthDay]/[birthYear]");
-    scanf("%40s %d %f %d/%d/%d", person->name, &person->age, &person->height, &person->bday.month, &person->bday.day, &person->bday.year);
+//    puts("Enter a person with the following format: [name] [age] [height] [birthMonth]/[birthDay]/[birthYear]");
+//    scanf("%40s %d %f %d/%d/%d", person->name, &person->age, &person->height, &person->bday.month, &person->bday.day, &person->bday.year);
+    puts("Enter the next person's name:");
+    scanf("%40s", person->name);
+    puts("Enter their age:");
+    scanf("%d", &person->age);
+    puts("Enter their height");
+    scanf("%f", &person->height);
+    puts("Enter their date of birth (MM/DD/YYYY)");
+    scanf("%d/%d/%d", &person->bday.month, &person->bday.day, &person->bday.year);
 }
 
 void addPersonalDataToDatabase(PERSON *person) {

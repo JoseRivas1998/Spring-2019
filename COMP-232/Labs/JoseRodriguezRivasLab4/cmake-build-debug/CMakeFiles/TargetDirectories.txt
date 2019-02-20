@@ -1,0 +1,3 @@
+/home/joserivas1998/Code/Spring-2019/COMP-232/Labs/JoseRodriguezRivasLab4/cmake-build-debug/CMakeFiles/rebuild_cache.dir
+/home/joserivas1998/Code/Spring-2019/COMP-232/Labs/JoseRodriguezRivasLab4/cmake-build-debug/CMakeFiles/scanner1.dir
+/home/joserivas1998/Code/Spring-2019/COMP-232/Labs/JoseRodriguezRivasLab4/cmake-build-debug/CMakeFiles/edit_cache.dir

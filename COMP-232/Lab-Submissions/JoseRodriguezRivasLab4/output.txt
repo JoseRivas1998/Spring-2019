@@ -1,0 +1,48 @@
+Jose de Jesus Rodriguez Rivas
+{IDENT, firstvar}
+{ASSIGNMENT, =}
+{NUMBER, 1}
+{SEMICOLON, ;}
+{IDENT, secondvar}
+{ASSIGNMENT, =}
+{NUMBER, 2}
+{SEMICOLON, ;}
+{REPEAT, repeat}
+{LPAREN, (}
+{NUMBER, 10}
+{RPAREN, )}
+{IDENT, thirdvar}
+{ASSIGNMENT, =}
+{NUMBER, 2}
+{MULT, *}
+{LPAREN, (}
+{IDENT, firstvar}
+{PLUS, +}
+{IDENT, secondvar}
+{RPAREN, )}
+{DIV, /}
+{LPAREN, (}
+{IDENT, firstvar}
+{PLUS, +}
+{NUMBER, 2}
+{RPAREN, )}
+{SEMICOLON, ;}
+{REPEAT, repeat}
+{LPAREN, (}
+{IDENT, firstvar}
+{PLUS, +}
+{NUMBER, 2}
+{MULT, *}
+{IDENT, secondvar}
+{RPAREN, )}
+{REPEAT, repeat}
+{LPAREN, (}
+{IDENT, thirdvar}
+{RPAREN, )}
+{PRINT, print}
+{IDENT, firstvar}
+{SEMICOLON, ;}
+
+
+Process finished with exit code 0
+

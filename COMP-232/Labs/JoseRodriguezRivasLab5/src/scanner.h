@@ -16,7 +16,7 @@ typedef enum
     INVALID_TOKEN = 0,
     NUMBER_TOKEN, //1
     IDENT_TOKEN,  //2
-    ASSIGNMENT,   //3
+    ASSIGNMENT,   //33
     SEMICOLON,    //4
     LPAREN,       //5
     RPAREN,       //6

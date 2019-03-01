@@ -11,8 +11,7 @@
 #include <stdbool.h>
 #include <ctype.h>
 
-typedef enum
-{
+typedef enum {
     INVALID_TOKEN = 0,
     NUMBER_TOKEN, //1
     IDENT_TOKEN,  //2
@@ -30,14 +29,12 @@ typedef enum
     END_OF_INPUT_TOKEN
 } TOKEN_TYPE;
 
-typedef struct token
-{
+typedef struct token {
     TOKEN_TYPE type;
     char *strVal;
 } TOKEN;
 
-typedef struct
-{
+typedef struct {
     int numberOfStates;
     int numberOfClasses;
     char **inputSymbolClasses;
@@ -45,12 +42,22 @@ typedef struct
 } TRANS_TABLE_TYPE;
 
 TRANS_TABLE_TYPE *scanInit();
+
 void updateTypeIfKeyword(TOKEN *token);
+
 int findIndexToClass(TRANS_TABLE_TYPE *transitionTable, char c);
-TOKEN* scanner(TRANS_TABLE_TYPE *outputTable);
+
+TOKEN *scanner(TRANS_TABLE_TYPE *outputTable);
 
 void ungetToken(TOKEN **);
+
 void freeToken(TOKEN **);
+
+char *escapeStringsToChars(char *str);
+
+void readCharClasses(TRANS_TABLE_TYPE *returnTable);
+
+void readTransTable(TRANS_TABLE_TYPE *returnTable);
 
 #define BUF_SIZE 128
 #define MAX_LINE_LENGTH 256

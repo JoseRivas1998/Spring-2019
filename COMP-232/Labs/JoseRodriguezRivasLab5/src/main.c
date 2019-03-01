@@ -20,6 +20,8 @@ int main(int argc, char** argv)
 
     dup2(savedstdin, 0);  // restore the original stdin, so we can read the input data from stdin
 
+    freopen(argv[2], "r", stdin);
+
     while ((token = scanner(transitionTable)) != NULL)
     {
         if ( token->strVal == NULL)

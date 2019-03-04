@@ -3,7 +3,11 @@
 // scanner_transition_table.c
 //
 // Assumes lectures: 1, 2, 3, 4
-
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 5
+* Date: 03/04/19
+**/
 #include "scanner.h"
 
 size_t lineBufferSize = MAX_LINE_LENGTH;
@@ -134,11 +138,7 @@ TOKEN *scanner(TRANS_TABLE_TYPE *transitionTable) {
     char *nextState;
     char *toAccept;
     int acceptType = 0;
-    bool firstEndOfFile = true;
-    while((token->type == INVALID_TOKEN) && ((c = getchar()) != EOF || firstEndOfFile)) {
-        if(c == EOF) {
-            firstEndOfFile = false;
-        }
+    while((token->type == INVALID_TOKEN) && ((c = getchar()) != EOF)) {
         cClass = findIndexToClass(transitionTable, c);
         if(cClass == -1) {
             // If classes not found, use invalid class
@@ -153,6 +153,7 @@ TOKEN *scanner(TRANS_TABLE_TYPE *transitionTable) {
             sscanf(toAccept, "%d", &acceptType);
             token->type = acceptType;
             updateTypeIfKeyword(token);
+            free(toAccept);
         } else if(nextState[0] == 'e') {
             token->type = INVALID_TOKEN;
             break;
@@ -162,7 +163,7 @@ TOKEN *scanner(TRANS_TABLE_TYPE *transitionTable) {
         }
         free(nextState);
     }
-    if (c == EOF && token->type == INVALID_TOKEN)
+    if (c == EOF)
     {
         free(token);
         return NULL;

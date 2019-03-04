@@ -2,7 +2,11 @@
 //  main.c (driver for a scanner test)
 //
 //  ASSUMES: Lecture 1, 2, 3, 4
-
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 5
+* Date: 03/04/19
+**/
 #include "scanner.h"
 #include <unistd.h>
 

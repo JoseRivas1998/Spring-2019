@@ -1,7 +1,11 @@
 // Lab5
 //  scanner.h
 //
-
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 5
+* Date: 03/04/19
+**/
 #ifndef __SCANNER_H
 #define __SCANNER_H
 

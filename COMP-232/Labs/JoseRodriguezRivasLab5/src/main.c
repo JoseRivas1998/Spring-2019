@@ -6,17 +6,6 @@
 #include "scanner.h"
 #include <unistd.h>
 
-void printTalbeDebug(TRANS_TABLE_TYPE *table) {
-    puts("Character classes:");
-    for (int i = 0; i < table->numberOfClasses; ++i) {
-        printf("%d\t%s\n", i, table->inputSymbolClasses[i]);
-    }
-    puts("State Transitions");
-    for(int i = 0; i < table->numberOfStates; i++) {
-        printf("%d\t%s\n", i, table->table[i]);
-    }
-}
-
 int main(int argc, char** argv)
 {
     TOKEN *token = NULL;
@@ -28,7 +17,6 @@ int main(int argc, char** argv)
     freopen(argv[1], "r", stdin); // possibly switch stdin to get the table from the file
 
     TRANS_TABLE_TYPE *transitionTable = scanInit();
-    printTalbeDebug(transitionTable);
 
     dup2(savedstdin, 0);  // restore the original stdin, so we can read the input data from stdin
 

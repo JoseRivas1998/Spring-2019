@@ -15,7 +15,7 @@ typedef enum {
     INVALID_TOKEN = 0,
     NUMBER_TOKEN, //1
     IDENT_TOKEN,  //2
-    ASSIGNMENT,   //33
+    ASSIGNMENT,   //3
     SEMICOLON,    //4
     LPAREN,       //5
     RPAREN,       //6
@@ -58,6 +58,10 @@ char *escapeStringsToChars(char *str);
 void readCharClasses(TRANS_TABLE_TYPE *returnTable);
 
 void readTransTable(TRANS_TABLE_TYPE *returnTable);
+
+void copyStringToStrVal(TOKEN *token, char *str);
+
+char* getNthString(int n, char *str, const char *delim);
 
 #define BUF_SIZE 128
 #define MAX_LINE_LENGTH 256

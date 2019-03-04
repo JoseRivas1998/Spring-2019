@@ -38,6 +38,11 @@ void freeToken(TOKEN **token) {
 //
 void updateTypeIfKeyword(TOKEN *token) {
 // TODO Implement the function
+    if((strcmp(token->strVal, "repeat")) == 0) {
+        token->type = REPEAT;
+    }else if((strcmp(token->strVal, "print")) == 0) {
+        token->type = PRINT;
+    }
 }
 
 
@@ -104,23 +109,68 @@ int findIndexToClass(TRANS_TABLE_TYPE *transitionTable, char c) {
         currentIndex = 0;
         do {
             checkChar = transitionTable->inputSymbolClasses[i][currentIndex++];
-            if(checkChar == c) {
+            if (checkChar == c) {
                 found = true;
                 class = i;
             }
-        } while(!found && checkChar != '\0');
+        } while (!found && checkChar != '\0');
     }
     return class;
 }
 
 TOKEN *scanner(TRANS_TABLE_TYPE *transitionTable) {
     TOKEN *token = NULL;
-
 // TODO Implement the functions
 
+    token = malloc(sizeof(token));
+    token->type = INVALID_TOKEN;
+    token->strVal = NULL;
+    char tempString[BUF_SIZE];
+    int index = 0;
 
+    char c;
+    int state = 0;
+    int cClass = 0;
+    char *nextState;
+    char *toAccept;
+    int acceptType = 0;
+    bool firstEndOfFile = true;
+    while((token->type == INVALID_TOKEN) && ((c = getchar()) != EOF || firstEndOfFile)) {
+        if(c == EOF) {
+            firstEndOfFile = false;
+        }
+        cClass = findIndexToClass(transitionTable, c);
+        if(cClass == -1) {
+            // If classes not found, use invalid class
+            cClass = transitionTable->numberOfClasses;
+        }
+        nextState = getNthString(cClass, transitionTable->table[state], " ");
+        if(nextState[0] == 'a') {
+            ungetc(c, stdin);
+            tempString[index] = '\0';
+            copyStringToStrVal(token, tempString);
+            toAccept = getNthString(transitionTable->numberOfClasses + 1, transitionTable->table[state], " ");
+            sscanf(toAccept, "%d", &acceptType);
+            token->type = acceptType;
+            updateTypeIfKeyword(token);
+        } else if(nextState[0] == 'e') {
+            token->type = INVALID_TOKEN;
+            break;
+        } else {
+            if(cClass != 12) tempString[index++] = c;
+            sscanf(nextState, "%d", &state);
+        }
+        free(nextState);
+    }
+    if (c == EOF && token->type == INVALID_TOKEN)
+    {
+        free(token);
+        return NULL;
+    }
     return token;
 }
+
+
 
 char *escapeStringsToChars(char *str) {
     size_t len = strlen(str) + 1;
@@ -149,5 +199,22 @@ char *escapeStringsToChars(char *str) {
     return tempString;
 }
 
+void copyStringToStrVal(TOKEN *token, char *str) {
+    token->strVal = malloc(sizeof(char) * (strlen(str) + 1));
+    strcpy(token->strVal, str);
+}
+
+char* getNthString(int n, char *str, const char *delim) {
+    char *result = NULL;
+    char *toRead = malloc(sizeof(char) * (strlen(str) + 1));
+    strcpy(toRead, str); // Copy to new string
+    char* currentStr = NULL;
+    for(int i = 0; i <= n; i++) {
+        currentStr = strsep(&toRead, delim);
+    }
+    result = malloc(sizeof(char) * (strlen(currentStr) + 1));
+    strcpy(result,currentStr);
+    return result;
+}
 
 

@@ -1,7 +1,6 @@
 #include "eval.h"
 
-void printProgram(NODE *node)
-{
+void printProgram(NODE *node) {
     printf("=> START program\n");
     if (node->leftNode != NULL)
         printStatement(node->leftNode);
@@ -10,48 +9,39 @@ void printProgram(NODE *node)
     printf("=> END program\n");
 }
 
-void printStatement(NODE *node)
-{
+void printStatement(NODE *node) {
 //   TODO: implement
 }
 
-void printAssignStmt(NODE *node)
-{
+void printAssignStmt(NODE *node) {
 //   TODO: implement
 }
 
-void printRepeatStmt(NODE *node)
-{
+void printRepeatStmt(NODE *node) {
 //   TODO: implement
 }
 
-void printPrintStmt(NODE *node)
-{
+void printPrintStmt(NODE *node) {
 //   TODO: implement
 }
 
-void printExpr(NODE *node)
-{
+void printExpr(NODE *node) {
 //   TODO: implement
 }
 
-void printTerm(NODE *node)
-{
+void printTerm(NODE *node) {
 //   TODO: implement
 }
 
-void printFactor(NODE *node)
-{
+void printFactor(NODE *node) {
 //   TODO: implement
 }
 
-void printId(NODE *node)
-{
+void printId(NODE *node) {
 //   TODO: implement
 }
 
-void printNumber(NODE *node)
-{
+void printNumber(NODE *node) {
 //   TODO: implement
 }
 

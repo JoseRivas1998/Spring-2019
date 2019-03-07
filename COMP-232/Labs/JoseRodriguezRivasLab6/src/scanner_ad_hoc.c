@@ -76,6 +76,7 @@ TOKEN *scannerAdHoc()
             case ' ': // skip whitespace
             case '\t':
             case '\n':
+            case '\r': // Windows line endings
                 break;
             case 'a'...'z': // c is a letter
                 i = 0;

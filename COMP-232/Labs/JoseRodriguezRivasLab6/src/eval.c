@@ -39,10 +39,17 @@ void printAssignStmt(NODE *node) {
 
 void printRepeatStmt(NODE *node) {
 //   TODO: implement
+    puts("=> START repeat");
+    printExpr(node->leftNode);
+    printStatement(node->rightNode);
+    puts("=> END repeat");
 }
 
 void printPrintStmt(NODE *node) {
 //   TODO: implement
+    puts("=> START print");
+    printExpr(node->leftNode);
+    puts("=> END print");
 }
 
 void printExpr(NODE *node) {
@@ -53,22 +60,41 @@ void printExpr(NODE *node) {
         printf("%c\n", node->data.op);
         printExpr(node->rightNode);
     }
-    puts("=> START expression");
+    puts("=> END expression");
 }
 
 void printTerm(NODE *node) {
 //   TODO: implement
-    puts("=> START expression");
+    puts("=> START term");
     printFactor(node->leftNode);
     if(node->rightNode != NULL) {
         printf("%c\n", node->data.op);
         printExpr(node->rightNode);
     }
-    puts("=> START expression");
+    puts("=> END term");
 }
 
 void printFactor(NODE *node) {
 //   TODO: implement
+    puts("=> START factor");
+    switch (node->leftNode->type) {
+        case IDENTIFIER_NODE:
+            printId(node->leftNode);
+            break;
+        case NUMBER_NODE:
+            printNumber(node->leftNode);
+            break;
+        case FACTOR_NODE:
+            printf("%c\n", node->data.op);
+            printFactor(node->leftNode);
+            break;
+        case EXPR_NODE:
+            printExpr(node->leftNode);
+            break;
+        default:
+            break;
+    }
+    puts("=> END factor");
 }
 
 void printId(NODE *node) {
@@ -80,5 +106,8 @@ void printId(NODE *node) {
 
 void printNumber(NODE *node) {
 //   TODO: implement
+    puts("=> START number");
+    printf("<number> %lf\n", node->data.number);
+    puts("=> END number");
 }
 

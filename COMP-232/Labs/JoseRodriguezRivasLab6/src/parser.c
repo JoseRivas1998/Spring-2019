@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 6
+* Date: 03/07/19
+**/
 #include "parser.h"
 
 bool tokenIsType(TOKEN **token, TOKEN_TYPE type) {
@@ -30,7 +35,7 @@ NODE *statement() {
 //   TODO: implement - done
     TOKEN *currToken = getNextToken(NULL);
     NODE *node = getEmptyNode(STATEMENT_NODE);
-    if(currToken == NULL) {
+    if (currToken == NULL || tokenIsType(&currToken, END_OF_INPUT_TOKEN)) {
         return NULL;
     }
     if (currToken->type == IDENT_TOKEN) {
@@ -83,7 +88,7 @@ NODE *repeatStmt(TOKEN **currToken) {
     }
     node->rightNode = statement();
     *currToken = getNextToken(currToken);
-    if(!tokenIsType(currToken, SEMICOLON_TOKEN)) {
+    if (!tokenIsType(currToken, SEMICOLON_TOKEN)) {
         error("Unexpected token, expected ;");
     }
     return node;
@@ -93,12 +98,12 @@ NODE *printStmt(TOKEN **currToken) {
 //   TODO: implement
     NODE *node = getEmptyNode(PRINT_STMT_NODE);
     *currToken = getNextToken(currToken);
-    if(!tokenIsType(currToken, PRINT_TOKEN)) {
+    if (!tokenIsType(currToken, PRINT_TOKEN)) {
         error("Unexpected token, expected print.");
     }
     node->leftNode = expr(currToken);
     *currToken = getNextToken(currToken);
-    if(!tokenIsType(currToken, SEMICOLON_TOKEN)) {
+    if (!tokenIsType(currToken, SEMICOLON_TOKEN)) {
         error("Unexpected token, expected ;");
     }
     return node;

@@ -1,0 +1,7 @@
+firstvar = 1;
+secon3dvar = 2;
+repeat (10)
+ thirdvar  2 * (firstvar % secondvar) / (firstvar + 2);
+repeat (firstvar + 2 * secondvar)
+ repeat (thirdvar)
+  print -firstvar;;;;

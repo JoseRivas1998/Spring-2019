@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 6
+* Date: 03/07/19
+**/
 #include "scanner.h"
 
 TOKEN *ungottenToken = NULL; // used by parser
@@ -149,8 +154,7 @@ TOKEN *scannerAdHoc()
     }
     if (c == EOF)
     {
-        free(token);
-        return NULL;
+        token->type = END_OF_INPUT_TOKEN;
     }
     return token;
 }

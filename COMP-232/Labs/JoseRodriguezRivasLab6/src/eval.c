@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 6
+* Date: 03/07/19
+**/
 #include "eval.h"
 #include "parser.h"
 
@@ -56,7 +61,7 @@ void printExpr(NODE *node) {
 //   TODO: implement
     puts("=> START expression");
     printTerm(node->leftNode);
-    if(node->rightNode != NULL) {
+    if (node->rightNode != NULL) {
         printf("%c\n", node->data.op);
         printExpr(node->rightNode);
     }
@@ -67,7 +72,7 @@ void printTerm(NODE *node) {
 //   TODO: implement
     puts("=> START term");
     printFactor(node->leftNode);
-    if(node->rightNode != NULL) {
+    if (node->rightNode != NULL) {
         printf("%c\n", node->data.op);
         printExpr(node->rightNode);
     }

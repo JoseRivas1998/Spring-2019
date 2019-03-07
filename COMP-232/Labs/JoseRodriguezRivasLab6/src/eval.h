@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 6
+* Date: 03/07/19
+**/
 #ifndef __EVAL_H
 #define __EVAL_H
 

@@ -1,6 +1,11 @@
 #ifndef __SCANNER_H
 #define __SCANNER_H
 
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 6
+* Date: 03/07/19
+**/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

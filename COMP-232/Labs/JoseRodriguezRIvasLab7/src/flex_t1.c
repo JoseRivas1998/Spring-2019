@@ -1,6 +1,6 @@
 #include "flex_t1.h"
 
-extern char **yytext;
+extern char *yytext;
 
 int main(int argc, char **argv) {
 
@@ -17,14 +17,21 @@ int main(int argc, char **argv) {
             "number",
             "identifier",
             "times",
-            "plus"
+            "plus",
+            "minus",
+            "divide",
+            "mod",
+            "semicolon",
+            "lparen",
+            "rparen",
+            "assignment"
     };
 
     while ((tok = yylex()) != 0) {
-        if(tok <= THEN_TOKEN) {
+        if(tok <= PRINT_TOKEN) {
             printf("{<keyword> \"%s\"}", token[tok - IF_TOKEN]);
         } else {
-            printf("{<%s>}\"%s\"", token[tok - IF_TOKEN], yytext);
+            printf("{<%s> \"%s\"}", token[tok - IF_TOKEN], yytext);
         }
     }
 }

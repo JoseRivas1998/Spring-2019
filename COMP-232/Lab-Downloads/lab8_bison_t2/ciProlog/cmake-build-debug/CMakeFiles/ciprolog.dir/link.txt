@@ -1,0 +1,1 @@
+/Applications/Xcode-beta.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -m64 -g -O0 -D_DEBUG -Wall -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/ciprolog.dir/src/ciProlog.c.o CMakeFiles/ciprolog.dir/ciPrologScanner.c.o CMakeFiles/ciprolog.dir/ciPrologParser.c.o  -o ciprolog 

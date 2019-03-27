@@ -1,0 +1,38 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../src/ciProlog.h
+stdio.h
+-
+stdlib.h
+-
+string.h
+-
+stdbool.h
+-
+ciPrologParser.h
+../src/ciPrologParser.h
+
+/Users/aj/Dropbox (CSUCI)/Teaching/Fall2018/COMP232-F18/labs/lab_8_bison/lab8_bison_t2/ciProlog/cmake-build-debug/ciPrologScanner.c
+stdio.h
+-
+string.h
+-
+errno.h
+-
+stdlib.h
+-
+inttypes.h
+-
+ciProlog.h
+/Users/aj/Dropbox (CSUCI)/Teaching/Fall2018/COMP232-F18/labs/lab_8_bison/lab8_bison_t2/ciProlog/cmake-build-debug/ciProlog.h
+unistd.h
+-
+
+ciPrologParser.h
+

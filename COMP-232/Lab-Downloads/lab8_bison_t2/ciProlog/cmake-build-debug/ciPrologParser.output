@@ -1,0 +1,90 @@
+Terminals which are not used
+
+   PROPOSITION
+   ASSERT
+   RETRACT
+   NOT
+   AND
+   OR
+   LPAREN
+   RPAREN
+
+
+Grammar
+
+    0 $accept: program $end
+
+    1 program: logexpr EOL
+
+    2 logexpr: HALT
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256)
+PROPOSITION (258)
+ASSERT (259)
+RETRACT (260)
+NOT (261)
+AND (262)
+OR (263)
+LPAREN (264)
+RPAREN (265)
+EOL (266) 1
+HALT (267) 2
+
+
+Nonterminals, with rules where they appear
+
+$accept (13)
+    on left: 0
+program (14)
+    on left: 1, on right: 0
+logexpr (15)
+    on left: 2, on right: 1
+
+
+state 0
+
+    0 $accept: . program $end
+
+    HALT  shift, and go to state 1
+
+    program  go to state 2
+    logexpr  go to state 3
+
+
+state 1
+
+    2 logexpr: HALT .
+
+    $default  reduce using rule 2 (logexpr)
+
+
+state 2
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 4
+
+
+state 3
+
+    1 program: logexpr . EOL
+
+    EOL  shift, and go to state 5
+
+
+state 4
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+state 5
+
+    1 program: logexpr EOL .
+
+    $default  reduce using rule 1 (program)

@@ -1,0 +1,3 @@
+# Hashes of file build rules.
+58e590c71333324958cca849a7ffa49a ciPrologParser.c
+395256f0b4ad2555e52a8ed4fa3fbf5e ciPrologScanner.c

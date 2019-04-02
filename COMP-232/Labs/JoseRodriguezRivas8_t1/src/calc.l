@@ -9,7 +9,7 @@
 
 digit[0-9]
 number -?{digit}+(\.{digit}+)?
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"logn"
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"
 
 %%
 

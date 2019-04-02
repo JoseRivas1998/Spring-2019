@@ -47,7 +47,7 @@ s_expr:
 f_expr:
    LPAREN FUNC s_expr RPAREN {
       fprintf(stderr, "yacc: s_expr ::= LPAREN FUNC expr RPAREN\n");
-      $$ = calc($2, $3, 0);
+      $$ = calc($2, $3, NAN);
       fprintf(stderr, "src returns %lf\n", $$);
    }
    | LPAREN FUNC s_expr s_expr RPAREN {

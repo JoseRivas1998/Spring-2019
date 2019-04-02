@@ -1,0 +1,19 @@
+Jose de Jesus Rodriguez Rivas
+> (add (exp (sub 3.5 (sqrt 15))) (log (remainder (pow 3 (sqrt 20)) 5.2)))
+0.545349
+
+> (add 1 3)
+4.000000
+
+> (log 2.72)
+1.000632
+
+> (log 2 16)
+4.000000
+
+> (log 10 1000000)
+6.000000
+
+> quit
+
+Process finished with exit code 0

@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 8_t1
+* Date: 03/26/19
+**/
 #ifndef __calc_h_
 #define __calc_h_
 
@@ -32,7 +37,6 @@ typedef enum {
     POW,
     MAX,
     MIN,
-    LOGN,
     EMPTY
 } CALC_FUNC;
 

@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 8_t1
+* Date: 03/26/19
+**/
 #include "calc.h"
 
 void yyerror(char *s) {
@@ -25,7 +30,6 @@ int resolveFunc(char *func) {
                      "pow",
                      "max",
                      "min",
-                     "logn",
                      ""};
 
     int i = 0;
@@ -59,72 +63,28 @@ double calc(char *func, double op1, double op2) {
         case EXP:
             return exp(op1);
         case SQRT:
-            if (op1 < 0) {
-                return nan("Square root of negative");
-            }
             return sqrt(op1);
         case ADD:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
             return op1 + op2;
         case SUB:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
             return op1 - op2;
         case MULT:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
             return op1 * op2;
         case DIV:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
-            if (op2 == 0) {
-                return nan("Divide by zero");
-            }
             return op1 / op2;
         case REMAINDER:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
-            if (op2 == 0) {
-                return nan("Divide by zero");
-            }
             return remainder(op1, op2);
         case LOG:
-            if (op1 <= 0) {
-                return nan("ln is not defined for x <= 0");
-            }
-            return log(op1);
-        case POW:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
-            return pow(op1, op2);
-        case MAX:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
-            return op1 > op2 ? op1 : op2;
-        case MIN:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
-            return op1 < op2 ? op1 : op2;
-        case LOGN:
-            if (isnan(op2)) {
-                return nan("nan operand");
-            }
-            if(op1 == 1 || op1 <= 0) {
-                return nan("log is not defined for base 1, 0, or negative");
-            }
-            if(op2 <= 0) {
-                return nan("logn(x) is not defined for x <= 0");
+            if(isnan(op2)) {
+                return log(op1);
             }
             return log(op2) / log(op1);
+        case POW:
+            return pow(op1, op2);
+        case MAX:
+            return op1 > op2 ? op1 : op2;
+        case MIN:
+            return op1 < op2 ? op1 : op2;
         case EMPTY:
             break;
     }

@@ -1,3 +1,8 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: Lab 8_t2
+* Date: 03/26/19
+**/
 #ifndef __ciProlog_h_
 #define __ciProlog_h_
 

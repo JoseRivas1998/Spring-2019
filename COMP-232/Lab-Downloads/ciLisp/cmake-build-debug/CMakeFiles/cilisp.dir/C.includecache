@@ -1,0 +1,80 @@
+#IncludeRegexLine: ^[ 	]*[#%][ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+../ciLispSrc/ciLisp.h
+stdio.h
+-
+stdlib.h
+-
+stdarg.h
+-
+string.h
+-
+math.h
+-
+stdbool.h
+-
+ciLispParser.h
+../ciLispSrc/ciLispParser.h
+
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/ciLispSrc/ciLisp.c
+ciLisp.h
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/ciLispSrc/ciLisp.h
+
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/ciLispSrc/ciLisp.h
+stdio.h
+-
+stdlib.h
+-
+stdarg.h
+-
+string.h
+-
+math.h
+-
+stdbool.h
+-
+ciLispParser.h
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/ciLispSrc/ciLispParser.h
+
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/cmake-build-debug/ciLispParser.c
+ciLisp.h
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/cmake-build-debug/ciLisp.h
+stddef.h
+-
+libintl.h
+-
+alloca.h
+-
+malloc.h
+-
+stdlib.h
+-
+stdlib.h
+-
+stdio.h
+-
+
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/cmake-build-debug/ciLispScanner.c
+stdio.h
+-
+string.h
+-
+errno.h
+-
+stdlib.h
+-
+inttypes.h
+-
+ciLisp.h
+/Users/aj/Dropbox (CSUCI)/19SpringComp232/labs/lab_9_15_ciLisp/ciLisp/cmake-build-debug/ciLisp.h
+unistd.h
+-
+
+ciLispParser.h
+

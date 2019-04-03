@@ -1,0 +1,165 @@
+Grammar
+
+    0 $accept: program $end
+
+    1 program: s_expr EOL
+
+    2 s_expr: NUMBER
+    3       | f_expr
+    4       | QUIT
+    5       | error
+
+    6 f_expr: LPAREN FUNC s_expr RPAREN
+    7       | LPAREN FUNC s_expr s_expr RPAREN
+
+
+Terminals, with rules where they appear
+
+$end (0) 0
+error (256) 5
+FUNC (258) 6 7
+NUMBER (259) 2
+LPAREN (260) 6 7
+RPAREN (261) 6 7
+EOL (262) 1
+QUIT (263) 4
+
+
+Nonterminals, with rules where they appear
+
+$accept (9)
+    on left: 0
+program (10)
+    on left: 1, on right: 0
+s_expr (11)
+    on left: 2 3 4 5, on right: 1 6 7
+f_expr (12)
+    on left: 6 7, on right: 3
+
+
+state 0
+
+    0 $accept: . program $end
+
+    error   shift, and go to state 1
+    NUMBER  shift, and go to state 2
+    LPAREN  shift, and go to state 3
+    QUIT    shift, and go to state 4
+
+    program  go to state 5
+    s_expr   go to state 6
+    f_expr   go to state 7
+
+
+state 1
+
+    5 s_expr: error .
+
+    $default  reduce using rule 5 (s_expr)
+
+
+state 2
+
+    2 s_expr: NUMBER .
+
+    $default  reduce using rule 2 (s_expr)
+
+
+state 3
+
+    6 f_expr: LPAREN . FUNC s_expr RPAREN
+    7       | LPAREN . FUNC s_expr s_expr RPAREN
+
+    FUNC  shift, and go to state 8
+
+
+state 4
+
+    4 s_expr: QUIT .
+
+    $default  reduce using rule 4 (s_expr)
+
+
+state 5
+
+    0 $accept: program . $end
+
+    $end  shift, and go to state 9
+
+
+state 6
+
+    1 program: s_expr . EOL
+
+    EOL  shift, and go to state 10
+
+
+state 7
+
+    3 s_expr: f_expr .
+
+    $default  reduce using rule 3 (s_expr)
+
+
+state 8
+
+    6 f_expr: LPAREN FUNC . s_expr RPAREN
+    7       | LPAREN FUNC . s_expr s_expr RPAREN
+
+    error   shift, and go to state 1
+    NUMBER  shift, and go to state 2
+    LPAREN  shift, and go to state 3
+    QUIT    shift, and go to state 4
+
+    s_expr  go to state 11
+    f_expr  go to state 7
+
+
+state 9
+
+    0 $accept: program $end .
+
+    $default  accept
+
+
+state 10
+
+    1 program: s_expr EOL .
+
+    $default  reduce using rule 1 (program)
+
+
+state 11
+
+    6 f_expr: LPAREN FUNC s_expr . RPAREN
+    7       | LPAREN FUNC s_expr . s_expr RPAREN
+
+    error   shift, and go to state 1
+    NUMBER  shift, and go to state 2
+    LPAREN  shift, and go to state 3
+    RPAREN  shift, and go to state 12
+    QUIT    shift, and go to state 4
+
+    s_expr  go to state 13
+    f_expr  go to state 7
+
+
+state 12
+
+    6 f_expr: LPAREN FUNC s_expr RPAREN .
+
+    $default  reduce using rule 6 (f_expr)
+
+
+state 13
+
+    7 f_expr: LPAREN FUNC s_expr s_expr . RPAREN
+
+    RPAREN  shift, and go to state 14
+
+
+state 14
+
+    7 f_expr: LPAREN FUNC s_expr s_expr RPAREN .
+
+    $default  reduce using rule 7 (f_expr)

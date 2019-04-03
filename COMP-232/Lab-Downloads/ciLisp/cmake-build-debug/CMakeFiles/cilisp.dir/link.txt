@@ -1,0 +1,1 @@
+/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/cc -m64 -g -O0 -D_DEBUG -Wall -g -Wl,-search_paths_first -Wl,-headerpad_max_install_names  CMakeFiles/cilisp.dir/ciLispSrc/ciLisp.c.o CMakeFiles/cilisp.dir/ciLispScanner.c.o CMakeFiles/cilisp.dir/ciLispParser.c.o  -o cilisp -lm 

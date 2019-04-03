@@ -39,7 +39,7 @@ typedef enum oper { // must be in sync with funcs in resolveFunc()
 OPER_TYPE resolveFunc(char *);
 
 typedef enum {
-    NUM_TYPE, FUNC_TYPE
+    NUM_TYPE, FUNC_TYPE, SYMBOL_TYPE
 } AST_NODE_TYPE;
 
 typedef struct {
@@ -52,11 +52,24 @@ typedef struct {
     struct ast_node *op2;
 } FUNCTION_AST_NODE;
 
+typedef struct symbol_table_node {
+    char *ident;
+    struct ast_node *val;
+    struct symbol_table_node *next;
+} SYMBOL_TABLE_NODE;
+
+typedef struct symbol_ast_node {
+    char *name;
+} SYMBOL_AST_NODE;
+
 typedef struct ast_node {
     AST_NODE_TYPE type;
+    SYMBOL_TABLE_NODE *symbolTable;
+    struct ast_node *parent;
     union {
         NUMBER_AST_NODE number;
         FUNCTION_AST_NODE function;
+        SYMBOL_AST_NODE symbol;
     } data;
 } AST_NODE;
 
@@ -67,5 +80,24 @@ AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2);
 void freeNode(AST_NODE *p);
 
 double eval(AST_NODE *ast);
+
+/**
+ * Creates a symbol table node
+ * @param symbol
+ * @param s_expr
+ * @return
+ */
+SYMBOL_TABLE_NODE *createSymbol(char *symbol, AST_NODE *s_expr);
+
+/**
+ * Adds let_elem to the given list
+ * @param let_list
+ * @param let_elem
+ */
+SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NODE *let_elem);
+
+AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr);
+
+AST_NODE *symbol(char *symb);
 
 #endif

@@ -7,9 +7,10 @@
 %}
 
 digit [0-9]
-number {digit}+(\.{digit}+)?
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"
-
+number [+-]?{digit}+(\.{digit}+)?
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"
+letter [a-zA-Z]
+symbol {letter}+
 %%
 
 {number} {
@@ -18,8 +19,12 @@ func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"
     return NUMBER;
     }
 
-"quit" {
+"quit"|"exit"|"QQ"|"/ff" {
     return QUIT;
+    }
+
+"let" {
+    return LET;
     }
 
 {func} {
@@ -28,6 +33,13 @@ func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"
     fprintf(stderr, "lex: FUNC sval = %s\n", yylval.sval);
     return FUNC;
     }
+
+{symbol} {
+    yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
+    strcpy(yylval.sval, yytext);
+    fprintf(stderr, "lex: SYMBOL sval = %s\n", yylval.sval);
+    return SYMBOL;
+}
 
 "(" {
     fprintf(stderr, "lex: LPAREN\n");
@@ -45,7 +57,7 @@ func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"
     return EOL;
     }
 
-[ |\t] ; /* skip whitespace */
+[ \t] {}; /* skip whitespace */
 
 . { // anything else
     printf("ERROR: invalid character: >>%s<<\n", yytext);
@@ -58,7 +70,7 @@ func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"
  */
 int main(void) {
 
-    //   freopen("/dev/null", "w", stderr); // except for this line that can be uncommented to throw away debug printouts
+       freopen("/dev/null", "w", stderr); // except for this line that can be uncommented to throw away debug printouts
 
     char *s_expr_str = NULL;
     size_t s_expr_str_len = 0;

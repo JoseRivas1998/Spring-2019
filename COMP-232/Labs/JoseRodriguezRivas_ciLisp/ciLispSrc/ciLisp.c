@@ -113,8 +113,6 @@ void freeNode(AST_NODE *p) {
         free(p->data.symbol.name);
     }
 
-    freeSymbolTable(p->symbolTable);
-
     free(p);
 }
 
@@ -183,6 +181,7 @@ double eval(AST_NODE *p) {
     }
 
     if(p->type == SYMBOL_TYPE) {
+
         AST_NODE *parent = p;
         while(parent != NULL) {
             SYMBOL_TABLE_NODE *cN = parent->symbolTable;
@@ -267,14 +266,4 @@ AST_NODE *symbol(char *symb) {
     p->type = SYMBOL_TYPE;
     p->data.symbol.name = symb;
     return p;
-}
-
-void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
-    if (!node) {
-        return;
-    }
-    freeSymbolTable(node->next);
-    freeNode(node->val);
-    free(node);
-
 }

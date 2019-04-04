@@ -100,6 +100,12 @@ void freeNode(AST_NODE *p) {
         freeNode(p->data.function.op2);
     }
 
+    if (p->type == SYMBOL_TYPE) {
+        free(p->data.symbol.name);
+    }
+
+    freeSymbolTable(p->symbolTable);
+
     free(p);
 }
 
@@ -136,7 +142,7 @@ double eval(AST_NODE *p) {
                 return eval(p->data.function.op1) * eval(p->data.function.op2);
             case DIV_OPER:
                 op2 = eval(p->data.function.op2);
-                if(isnan(op2) || op2 == 0) {
+                if (isnan(op2) || op2 == 0) {
                     return NaN;
                 }
                 return eval(p->data.function.op1) / op2;
@@ -163,6 +169,7 @@ double eval(AST_NODE *p) {
 
     return 0.0;
 }
+
 SYMBOL_TABLE_NODE *createSymbol(char *symbol, AST_NODE *s_expr) {
     SYMBOL_TABLE_NODE *p;
     size_t nodeSize = sizeof(SYMBOL_TABLE_NODE);
@@ -179,10 +186,10 @@ SYMBOL_TABLE_NODE *createSymbol(char *symbol, AST_NODE *s_expr) {
 }
 
 SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NODE *let_elem) {
-    if(let_elem == NULL) {
+    if (let_elem == NULL) {
         return let_list;
     }
-    if(let_elem->val == NULL) {
+    if (let_elem->val == NULL) {
         return let_list;
     }
     let_list->next = let_elem;
@@ -190,14 +197,14 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
 }
 
 AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr) {
-    if(s_expr == NULL) {
+    if (s_expr == NULL) {
         return NULL;
     }
 
     SYMBOL_TABLE_NODE *cN = let_section;
-    while(cN != NULL) {
+    while (cN != NULL) {
         cN->val->parent = s_expr;
-        cN = cN ->next;
+        cN = cN->next;
     }
 
     s_expr->symbolTable = let_section;
@@ -214,6 +221,15 @@ AST_NODE *symbol(char *symb) {
         yyerror("out of memory");
 
     p->type = SYMBOL_TYPE;
-    
+    p->data.symbol.name = symb;
+    return p;
+}
 
+void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
+    if (node != NULL) {
+        if (node->next != NULL) {
+            freeSymbolTable(node->next);
+        }
+        free(node);
+    }
 }

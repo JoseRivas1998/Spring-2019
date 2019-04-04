@@ -100,4 +100,7 @@ AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr);
 
 AST_NODE *symbol(char *symb);
 
+void freeSymbolTable(SYMBOL_TABLE_NODE *node);
+
+
 #endif

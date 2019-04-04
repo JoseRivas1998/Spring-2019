@@ -29,6 +29,9 @@ char *func[] = {
         "exp2",
         "cbrt",
         "hypot",
+        "sin",
+        "cos",
+        "tan",
         "read",
         "rand",
         "print",
@@ -81,6 +84,12 @@ AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2) {
 
     p->type = FUNC_TYPE;
     p->data.function.name = funcName;
+    if(op1 != NULL) {
+        op1->parent = p;
+    }
+    if(op2 != NULL) {
+        op2->parent = p;
+    }
     p->data.function.op1 = op1;
     p->data.function.op2 = op2;
 
@@ -164,7 +173,36 @@ double eval(AST_NODE *p) {
                 return hypot(eval(p->data.function.op1), eval(p->data.function.op2));
             case CUSTOM_FUNC:
                 break;
+            case SIN_OPER:
+                return sin(eval(p->data.function.op1));
+            case COS_OPER:
+                return cos(eval(p->data.function.op1));
+            case TAN_OPER:
+                return tan(eval(p->data.function.op1));
         }
+    }
+
+    if(p->type == SYMBOL_TYPE) {
+        AST_NODE *parent = p;
+        while(parent != NULL) {
+            SYMBOL_TABLE_NODE *cN = parent->symbolTable;
+            while(cN != NULL) {
+                if(cN->ident == NULL) {
+                    cN = cN->next;
+                    continue;
+                }
+                if(strcmp(cN->ident, p->data.symbol.name) == 0) {
+                    return eval(cN->val);
+                }
+                cN = cN->next;
+            }
+            parent = parent->parent;
+        }
+        char* error = malloc(128 * sizeof(char));
+        sprintf(error, "The variable %s is undefined", p->data.symbol.name);
+        yyerror(error);
+        free(error);
+        exit(-1);
     }
 
     return 0.0;
@@ -192,7 +230,13 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
     if (let_elem->val == NULL) {
         return let_list;
     }
-    let_list->next = let_elem;
+    SYMBOL_TABLE_NODE *prev_node = let_list;
+    SYMBOL_TABLE_NODE *curr_node = let_list->next;
+    while(curr_node != NULL) {
+        prev_node = curr_node;
+        curr_node = curr_node->next;
+    }
+    prev_node->next = let_elem;
     return let_list;
 }
 
@@ -226,10 +270,11 @@ AST_NODE *symbol(char *symb) {
 }
 
 void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
-    if (node != NULL) {
-        if (node->next != NULL) {
-            freeSymbolTable(node->next);
-        }
-        free(node);
+    if (!node) {
+        return;
     }
+    freeSymbolTable(node->next);
+    freeNode(node->val);
+    free(node);
+
 }

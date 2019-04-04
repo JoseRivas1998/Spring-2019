@@ -32,11 +32,11 @@ s_expr:
 	fprintf(stderr, "yacc: s_expr ::= NUMBER\n");
 	$$ = number($1);
 	}
-	| f_expr {
-	$$ = $1;
-	}
 	| SYMBOL {
 	$$ = symbol($1);
+	}
+	| f_expr {
+	$$ = $1;
 	}
 	| LPAREN let_section s_expr RPAREN {
 	$$ = setSymbolTable($2, $3);
@@ -61,11 +61,11 @@ f_expr:
 	$$ = function($2, $3, $4);
 	};
 let_section:
-	LPAREN let_list RPAREN {
-		$$ = $2;
-	}
-	| {
+	{
 		$$ = NULL;
+	}
+	| LPAREN let_list RPAREN {
+		$$ = $2;
 	};
 let_list:
 	let_list let_elem {

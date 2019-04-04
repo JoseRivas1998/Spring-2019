@@ -201,7 +201,7 @@ double eval(AST_NODE *p) {
         sprintf(error, "The variable %s is undefined", p->data.symbol.name);
         yyerror(error);
         free(error);
-        exit(-1);
+        exit(0);
     }
 
     return 0.0;

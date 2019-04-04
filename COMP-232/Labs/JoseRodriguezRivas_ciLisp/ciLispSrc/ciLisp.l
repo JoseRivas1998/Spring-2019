@@ -39,7 +39,7 @@ symbol {letter}+
     strcpy(yylval.sval, yytext);
     fprintf(stderr, "lex: SYMBOL sval = %s\n", yylval.sval);
     return SYMBOL;
-}
+    }
 
 "(" {
     fprintf(stderr, "lex: LPAREN\n");

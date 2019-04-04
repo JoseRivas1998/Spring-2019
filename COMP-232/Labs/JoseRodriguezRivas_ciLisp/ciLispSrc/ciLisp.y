@@ -61,7 +61,7 @@ f_expr:
 	$$ = function($2, $3, $4);
 	};
 let_section:
-	{
+	/*empty*/{
 		$$ = NULL;
 	}
 	| LPAREN let_list RPAREN {

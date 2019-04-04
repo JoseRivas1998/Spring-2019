@@ -56,12 +56,8 @@ OPER_TYPE resolveFunc(char *funcName) {
 // create a node for a number
 //
 AST_NODE *number(double value) {
-    AST_NODE *p;
-    size_t nodeSize;
-
-    // allocate space for the fixed sie and the variable part (union)
-    nodeSize = sizeof(AST_NODE) + sizeof(NUMBER_AST_NODE);
-    if ((p = malloc(nodeSize)) == NULL)
+    AST_NODE *p = malloc(sizeof(AST_NODE));
+    if (p == NULL)
         yyerror("out of memory");
 
     p->type = NUM_TYPE;
@@ -74,20 +70,16 @@ AST_NODE *number(double value) {
 // create a node for a function
 //
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2) {
-    AST_NODE *p;
-    size_t nodeSize;
-
-    // allocate space for the fixed sie and the variable part (union)
-    nodeSize = sizeof(AST_NODE) + sizeof(FUNCTION_AST_NODE);
-    if ((p = malloc(nodeSize)) == NULL)
+    AST_NODE *p = malloc(sizeof(AST_NODE));
+    if (p == NULL)
         yyerror("out of memory");
 
     p->type = FUNC_TYPE;
     p->data.function.name = funcName;
-    if(op1 != NULL) {
+    if (op1 != NULL) {
         op1->parent = p;
     }
-    if(op2 != NULL) {
+    if (op2 != NULL) {
         op2->parent = p;
     }
     p->data.function.op1 = op1;
@@ -113,7 +105,79 @@ void freeNode(AST_NODE *p) {
         free(p->data.symbol.name);
     }
 
+
     free(p);
+}
+
+double evalFunc(AST_NODE *p) {
+    double op1 = eval(p->data.function.op1);
+    double op2 = eval(p->data.function.op2);
+    OPER_TYPE op = resolveFunc(p->data.function.name);
+    switch (op) {
+        case NEG_OPER:
+            return -op1;
+        case ABS_OPER:
+            return fabs(op1);
+        case EXP_OPER:
+            return exp(op1);
+        case SQRT_OPER:
+            return sqrt(op1);
+        case ADD_OPER:
+            return op1 + op2;
+        case SUB_OPER:
+            return op1 - op2;
+        case MULT_OPER:
+            return op1 * op2;
+        case DIV_OPER:
+            if (isnan(op2) || op2 == 0) {
+                return NaN;
+            }
+            return op1 / op2;
+        case REMAINDER_OPER:
+            return remainder(op1, op2);
+        case LOG_OPER:
+            return log(op1);
+        case POW_OPER:
+            return pow(op1, op2);
+        case MAX_OPER:
+            return fmax(op1, op2);
+        case MIN_OPER:
+            return fmin(op1, op2);
+        case EXP2_OPER:
+            return exp2(op1);
+        case CBRT_OPER:
+            return cbrt(op1);
+        case HYPOT_OPER:
+            return hypot(op1, op2);
+        case CUSTOM_FUNC:
+            break;
+        case SIN_OPER:
+            return sin(op1);
+        case COS_OPER:
+            return cos(op1);
+        case TAN_OPER:
+            return tan(op1);
+    }
+    return 0.0;
+}
+
+double evalSymbol(AST_NODE *p) {
+    AST_NODE *parent = p;
+    while (parent != NULL) {
+        SYMBOL_TABLE_NODE *cN = parent->symbolTable;
+        while (cN != NULL) {
+            if (strcmp(cN->ident, p->data.symbol.name) == 0) {
+                return eval(cN->val);
+            }
+            cN = cN->next;
+        }
+        parent = parent->parent;
+    }
+    char *error = malloc(128 * sizeof(char));
+    sprintf(error, "The variable %s is undefined", p->data.symbol.name);
+    yyerror(error);
+    free(error);
+    exit(0);
 }
 
 //
@@ -129,89 +193,22 @@ double eval(AST_NODE *p) {
     if (p->type == NUM_TYPE) {
         return p->data.number.value;
     }
-    double op2;
 
     if (p->type == FUNC_TYPE) {
-        switch (resolveFunc(p->data.function.name)) {
-            case NEG_OPER:
-                return -eval(p->data.function.op1);
-            case ABS_OPER:
-                return fabs(eval(p->data.function.op1));
-            case EXP_OPER:
-                return exp(eval(p->data.function.op1));
-            case SQRT_OPER:
-                return sqrt(eval(p->data.function.op1));
-            case ADD_OPER:
-                return eval(p->data.function.op1) + eval(p->data.function.op2);
-            case SUB_OPER:
-                return eval(p->data.function.op1) - eval(p->data.function.op2);
-            case MULT_OPER:
-                return eval(p->data.function.op1) * eval(p->data.function.op2);
-            case DIV_OPER:
-                op2 = eval(p->data.function.op2);
-                if (isnan(op2) || op2 == 0) {
-                    return NaN;
-                }
-                return eval(p->data.function.op1) / op2;
-            case REMAINDER_OPER:
-                return remainder(eval(p->data.function.op1), eval(p->data.function.op2));
-            case LOG_OPER:
-                return log(eval(p->data.function.op1));
-            case POW_OPER:
-                return pow(eval(p->data.function.op1), eval(p->data.function.op2));
-            case MAX_OPER:
-                return fmax(eval(p->data.function.op1), eval(p->data.function.op2));
-            case MIN_OPER:
-                return fmin(eval(p->data.function.op1), eval(p->data.function.op2));
-            case EXP2_OPER:
-                return exp2(eval(p->data.function.op1));
-            case CBRT_OPER:
-                return cbrt(eval(p->data.function.op1));
-            case HYPOT_OPER:
-                return hypot(eval(p->data.function.op1), eval(p->data.function.op2));
-            case CUSTOM_FUNC:
-                break;
-            case SIN_OPER:
-                return sin(eval(p->data.function.op1));
-            case COS_OPER:
-                return cos(eval(p->data.function.op1));
-            case TAN_OPER:
-                return tan(eval(p->data.function.op1));
-        }
+        return evalFunc(p);
     }
 
-    if(p->type == SYMBOL_TYPE) {
-
-        AST_NODE *parent = p;
-        while(parent != NULL) {
-            SYMBOL_TABLE_NODE *cN = parent->symbolTable;
-            while(cN != NULL) {
-                if(cN->ident == NULL) {
-                    cN = cN->next;
-                    continue;
-                }
-                if(strcmp(cN->ident, p->data.symbol.name) == 0) {
-                    return eval(cN->val);
-                }
-                cN = cN->next;
-            }
-            parent = parent->parent;
-        }
-        char* error = malloc(128 * sizeof(char));
-        sprintf(error, "The variable %s is undefined", p->data.symbol.name);
-        yyerror(error);
-        free(error);
-        exit(0);
+    if (p->type == SYMBOL_TYPE) {
+        return evalSymbol(p);
     }
 
     return 0.0;
 }
 
 SYMBOL_TABLE_NODE *createSymbol(char *symbol, AST_NODE *s_expr) {
-    SYMBOL_TABLE_NODE *p;
-    size_t nodeSize = sizeof(SYMBOL_TABLE_NODE);
+    SYMBOL_TABLE_NODE *p = malloc(sizeof(SYMBOL_TABLE_NODE));
 
-    if ((p = malloc(nodeSize)) == NULL) {
+    if (p == NULL) {
         yyerror("out of memory");
     }
 
@@ -231,7 +228,7 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
     }
     SYMBOL_TABLE_NODE *prev_node = let_list;
     SYMBOL_TABLE_NODE *curr_node = let_list->next;
-    while(curr_node != NULL) {
+    while (curr_node != NULL) {
         prev_node = curr_node;
         curr_node = curr_node->next;
     }
@@ -255,15 +252,21 @@ AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr) {
 }
 
 AST_NODE *symbol(char *symb) {
-    AST_NODE *p;
-    size_t nodeSize;
-
-    // allocate space for the fixed sie and the variable part (union)
-    nodeSize = sizeof(AST_NODE) + sizeof(SYMBOL_AST_NODE);
-    if ((p = malloc(nodeSize)) == NULL)
+    AST_NODE *p = calloc(1, sizeof(AST_NODE));
+    if (p == NULL)
         yyerror("out of memory");
 
     p->type = SYMBOL_TYPE;
     p->data.symbol.name = symb;
     return p;
+}
+
+void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
+    if (node == NULL) {
+        return;
+    }
+    freeSymbolTable(node->next);
+    free(node->ident);
+    freeNode(node->val);
+    free(node);
 }

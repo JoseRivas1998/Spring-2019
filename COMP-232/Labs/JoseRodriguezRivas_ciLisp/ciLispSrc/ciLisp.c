@@ -55,13 +55,25 @@ OPER_TYPE resolveFunc(char *funcName) {
 //
 // create a node for a number
 //
-AST_NODE *number(double value) {
-    AST_NODE *p = malloc(sizeof(AST_NODE));
+AST_NODE *real_number(double value) {
+    AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
         yyerror("out of memory");
 
     p->type = NUM_TYPE;
-    p->data.number.value = value;
+    p->data.number.value.type = REAL_TYPE;
+    p->data.number.value.value = value;
+
+    return p;
+}
+AST_NODE *int_number(int value) {
+    AST_NODE *p = calloc(1, sizeof(AST_NODE));
+    if (p == NULL)
+        yyerror("out of memory");
+
+    p->type = NUM_TYPE;
+    p->data.number.value.type = INTEGER_TYPE;
+    p->data.number.value.value = value;
 
     return p;
 }
@@ -70,7 +82,7 @@ AST_NODE *number(double value) {
 // create a node for a function
 //
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2) {
-    AST_NODE *p = malloc(sizeof(AST_NODE));
+    AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
         yyerror("out of memory");
 
@@ -105,69 +117,114 @@ void freeNode(AST_NODE *p) {
         free(p->data.symbol.name);
     }
 
+    freeSymbolTable(p->symbolTable);
 
     free(p);
 }
 
-double evalFunc(AST_NODE *p) {
-    double op1 = eval(p->data.function.op1);
-    double op2 = eval(p->data.function.op2);
+RETURN_VALUE evalFunc(AST_NODE *p) {
+    RETURN_VALUE p1 = eval(p->data.function.op1);
+    RETURN_VALUE p2 = eval(p->data.function.op2);
+    double op1 = p1.value;
+    double op2 = p2.value;
+    RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
+    result->type = REAL_TYPE;
+    if(p1.type == INTEGER_TYPE && p2.type == INTEGER_TYPE) {
+        result->type = INTEGER_TYPE;
+    }
     OPER_TYPE op = resolveFunc(p->data.function.name);
     switch (op) {
         case NEG_OPER:
-            return -op1;
+            result->type = p1.type;
+            result->value = -op1;
+            break;
         case ABS_OPER:
-            return fabs(op1);
+            result->type = p1.type;
+            result->value = fabs(op1);
+            break;
         case EXP_OPER:
-            return exp(op1);
+            result->type = p1.type;
+            result->value = exp(op1);
+            break;
         case SQRT_OPER:
-            return sqrt(op1);
+            result->type = p1.type;
+            result->value = sqrt(op1);
+            break;
         case ADD_OPER:
-            return op1 + op2;
+            result->value = op1 + op2;
+            break;
         case SUB_OPER:
-            return op1 - op2;
+            result->value = op1 - op2;
+            break;
         case MULT_OPER:
-            return op1 * op2;
+            result->value = op1 * op2;
+            break;
         case DIV_OPER:
             if (isnan(op2) || op2 == 0) {
-                return NaN;
+                result->value = NaN;
+                break;
             }
-            return op1 / op2;
+            result->value = op1 / op2;
+            break;
         case REMAINDER_OPER:
-            return remainder(op1, op2);
+            result->value = remainder(op1, op2);
+            break;
         case LOG_OPER:
-            return log(op1);
+            result->type = p1.type;
+            result->value = log(op1);
+            break;
         case POW_OPER:
-            return pow(op1, op2);
+            result->value = pow(op1, op2);
+            break;
         case MAX_OPER:
-            return fmax(op1, op2);
+            result->value = fmax(op1, op2);
+            break;
         case MIN_OPER:
-            return fmin(op1, op2);
+            result->value = fmin(op1, op2);
+            break;
         case EXP2_OPER:
-            return exp2(op1);
+            result->type = p1.type;
+            result->value = exp2(op1);
+            break;
         case CBRT_OPER:
-            return cbrt(op1);
+            result->type = p1.type;
+            result->value = cbrt(op1);
+            break;
         case HYPOT_OPER:
-            return hypot(op1, op2);
+            result->value = hypot(op1, op2);
+            break;
         case CUSTOM_FUNC:
             break;
         case SIN_OPER:
-            return sin(op1);
+            result->type = p1.type;
+            result->value = sin(op1);
+            break;
         case COS_OPER:
-            return cos(op1);
+            result->type = p1.type;
+            result->value = cos(op1);
+            break;
         case TAN_OPER:
-            return tan(op1);
+            result->type = p1.type;
+            result->value = tan(op1);
+            break;
     }
-    return 0.0;
+    return *result;
 }
 
-double evalSymbol(AST_NODE *p) {
+RETURN_VALUE evalSymbol(AST_NODE *p) {
     AST_NODE *parent = p;
     while (parent != NULL) {
         SYMBOL_TABLE_NODE *cN = parent->symbolTable;
         while (cN != NULL) {
             if (strcmp(cN->ident, p->data.symbol.name) == 0) {
-                return eval(cN->val);
+                double literalVal = eval(cN->val).value;
+                if(cN->val_type == INTEGER_TYPE) {
+                    literalVal = (int) literalVal;
+                }
+                RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
+                result->type = cN->val_type;
+                result->value = literalVal;
+                return *result;
             }
             cN = cN->next;
         }
@@ -180,17 +237,27 @@ double evalSymbol(AST_NODE *p) {
     exit(0);
 }
 
+RETURN_VALUE zero() {
+    RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
+    result->type = NO_TYPE;
+    result->value = 0.0;
+    return *result;
+}
+
 //
 // evaluate an abstract syntax tree
 //
 // p points to the root
 //
-double eval(AST_NODE *p) {
-    if (!p)
-        return 0.0;
+RETURN_VALUE eval(AST_NODE *p) {
+    if (!p){
+        return zero();
+    }
+
 
 // TBD: implement
     if (p->type == NUM_TYPE) {
+
         return p->data.number.value;
     }
 
@@ -202,14 +269,24 @@ double eval(AST_NODE *p) {
         return evalSymbol(p);
     }
 
-    return 0.0;
+    return zero();
 }
 
-SYMBOL_TABLE_NODE *createSymbol(char *symbol, AST_NODE *s_expr) {
+SYMBOL_TABLE_NODE *createSymbol(char* type, char *symbol, AST_NODE *s_expr) {
     SYMBOL_TABLE_NODE *p = malloc(sizeof(SYMBOL_TABLE_NODE));
 
     if (p == NULL) {
         yyerror("out of memory");
+    }
+
+    if(type == NULL) {
+        p->val_type = NO_TYPE;
+    } else if(strcmp(type, "real") == 0) {
+        p->val_type = REAL_TYPE;
+    } else if(strcmp(type, "integer") == 0) {
+        p->val_type = INTEGER_TYPE;
+    } else {
+        p->val_type = NO_TYPE;
     }
 
     p->ident = symbol;
@@ -226,14 +303,16 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
     if (let_elem->val == NULL) {
         return let_list;
     }
-    SYMBOL_TABLE_NODE *prev_node = let_list;
-    SYMBOL_TABLE_NODE *curr_node = let_list->next;
-    while (curr_node != NULL) {
-        prev_node = curr_node;
-        curr_node = curr_node->next;
+    SYMBOL_TABLE_NODE *symbol = findSymbol(let_elem, let_elem);
+    if(symbol == NULL) {
+        let_elem->next = let_list;
+        return let_elem;
+    } else {
+        symbol->val = let_elem->val;
+        symbol->val->data = let_elem->val->data;
+        freeSymbolTable(let_elem);
+        return let_list;
     }
-    prev_node->next = let_elem;
-    return let_list;
 }
 
 AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr) {
@@ -257,7 +336,8 @@ AST_NODE *symbol(char *symb) {
         yyerror("out of memory");
 
     p->type = SYMBOL_TYPE;
-    p->data.symbol.name = symb;
+    p->data.symbol.name = malloc(strlen(symb) + 1);
+    strcpy(p->data.symbol.name, symb);
     return p;
 }
 
@@ -269,4 +349,18 @@ void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
     free(node->ident);
     freeNode(node->val);
     free(node);
+}
+
+SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol) {
+    if(symbol == NULL) {
+        return NULL;
+    }
+    SYMBOL_TABLE_NODE *cNode = symbolTable;
+    while(cNode != NULL) {
+        if(strcmp(cNode->ident, symbol->ident) == 0) {
+            return cNode;
+        }
+        cNode = cNode->next;
+    }
+    return NULL;
 }

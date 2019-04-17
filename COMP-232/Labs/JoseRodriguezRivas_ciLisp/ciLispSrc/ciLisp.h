@@ -45,8 +45,15 @@ typedef enum {
     NUM_TYPE, FUNC_TYPE, SYMBOL_TYPE
 } AST_NODE_TYPE;
 
-typedef struct {
+typedef enum { NO_TYPE, INTEGER_TYPE, REAL_TYPE } DATA_TYPE;
+
+typedef struct return_value {
+    DATA_TYPE type;
     double value;
+} RETURN_VALUE;
+
+typedef struct {
+    RETURN_VALUE value;
 } NUMBER_AST_NODE;
 
 typedef struct {
@@ -56,6 +63,7 @@ typedef struct {
 } FUNCTION_AST_NODE;
 
 typedef struct symbol_table_node {
+    DATA_TYPE val_type;
     char *ident;
     struct ast_node *val;
     struct symbol_table_node *next;
@@ -76,13 +84,14 @@ typedef struct ast_node {
     } data;
 } AST_NODE;
 
-AST_NODE *number(double value);
+AST_NODE *real_number(double value);
+AST_NODE *int_number(int value);
 
 AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2);
 
 void freeNode(AST_NODE *p);
 
-double eval(AST_NODE *ast);
+RETURN_VALUE eval(AST_NODE *ast);
 
 /**
  * Creates a symbol table node
@@ -90,7 +99,7 @@ double eval(AST_NODE *ast);
  * @param s_expr
  * @return
  */
-SYMBOL_TABLE_NODE *createSymbol(char *symbol, AST_NODE *s_expr);
+SYMBOL_TABLE_NODE *createSymbol(char* type, char *symbol, AST_NODE *s_expr);
 
 /**
  * Adds let_elem to the given list
@@ -103,5 +112,7 @@ AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr);
 
 AST_NODE *symbol(char *symb);
 
+void freeSymbolTable(SYMBOL_TABLE_NODE *node);
+SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol);
 
 #endif

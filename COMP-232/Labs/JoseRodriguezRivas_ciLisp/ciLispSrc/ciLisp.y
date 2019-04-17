@@ -9,8 +9,8 @@
     struct symbol_table_node *symbolNode;
 };
 
-%token <sval> FUNC SYMBOL
-%token <dval> NUMBER
+%token <sval> FUNC SYMBOL TYPE
+%token <dval> REAL_NUMBER INTEGER_NUMBER
 %token LPAREN RPAREN EOL QUIT LET
 
 %type <astNode> s_expr f_expr
@@ -22,15 +22,18 @@ program:
 	s_expr EOL {
 	fprintf(stderr, "yacc: program ::= s_expr EOL\n");
 	if ($1) {
-	    printf("%lf", eval($1));
+	    printf("%lf", eval($1).value);
 	    freeNode($1);
 	}
 	};
 
 s_expr:
-	NUMBER {
+	REAL_NUMBER {
 	fprintf(stderr, "yacc: s_expr ::= NUMBER\n");
-	$$ = number($1);
+	$$ = real_number($1);
+	}
+	| INTEGER_NUMBER {
+	$$ = int_number($1);
 	}
 	| SYMBOL {
 	$$ = symbol($1);
@@ -75,8 +78,11 @@ let_list:
 		$$ = $2;
 	};
 let_elem:
-	LPAREN SYMBOL s_expr RPAREN {
-		$$ = createSymbol($2, $3);
+	LPAREN TYPE SYMBOL s_expr RPAREN {
+		$$ = createSymbol($2, $3, $4);
+	}
+	| LPAREN SYMBOL s_expr RPAREN {
+		$$ = createSymbol(NULL, $2, $3);
 	};
 %%
 

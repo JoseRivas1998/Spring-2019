@@ -36,6 +36,7 @@ typedef enum oper { // must be in sync with funcs in resolveFunc()
     SIN_OPER, // 16
     COS_OPER, // 17
     TAN_OPER, // 18
+    PRINT_OPER, // 19
     CUSTOM_FUNC=255
 } OPER_TYPE;
 

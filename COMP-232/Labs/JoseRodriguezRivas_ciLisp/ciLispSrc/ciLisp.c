@@ -32,9 +32,9 @@ char *func[] = {
         "sin",
         "cos",
         "tan",
+        "print",
         "read",
         "rand",
-        "print",
         "equal",
         "smaller",
         "larger",
@@ -207,6 +207,20 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
             result->type = p1.type;
             result->value = tan(op1);
             break;
+        case PRINT_OPER:
+            result->type = p1.type;
+            switch (result->type) {
+                case NO_TYPE:
+                case REAL_TYPE:
+                    result->value = p1.value;
+                    printf("=> %.2f", result->value);
+                    break;
+                case INTEGER_TYPE:
+                    result->value = (int) p1.value;
+                    printf("=> %d", (int) result->value);
+                    break;
+            }
+            break;
     }
     return *result;
 }
@@ -237,11 +251,19 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
     exit(0);
 }
 
-RETURN_VALUE zero() {
+RETURN_VALUE numVal(double num) {
     RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
     result->type = NO_TYPE;
-    result->value = 0.0;
+    result->value = num;
     return *result;
+}
+
+RETURN_VALUE zero() {
+    return numVal(0);
+}
+
+RETURN_VALUE one() {
+    return numVal(1);
 }
 
 //

@@ -66,6 +66,7 @@ AST_NODE *real_number(double value) {
 
     return p;
 }
+
 AST_NODE *int_number(int value) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
@@ -90,7 +91,7 @@ AST_NODE *function(char *funcName, AST_NODE *opList) {
     p->data.function.name = funcName;
     p->data.function.opList = opList;
     AST_NODE *cN = opList;
-    while(cN != NULL) {
+    while (cN != NULL) {
         cN->parent = p;
         cN = cN->next;
     }
@@ -121,184 +122,172 @@ void freeNode(AST_NODE *p) {
     free(p);
 }
 
-PARAM_LIST *getParamList(AST_NODE *p) {
-    if(p == NULL || p->type != FUNC_TYPE) {
-        return NULL;
+void evalUnary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
+    RETURN_VALUE p1 = eval(opList);
+    double op = p1.value;
+    out->type = p1.type;
+    switch (operation) {
+        case NEG_OPER:
+            out->value = -op;
+            break;
+        case ABS_OPER:
+            out->value = fabs(op);
+            break;
+        case EXP_OPER:
+            out->value = exp(op);
+            break;
+        case SQRT_OPER:
+            out->value = sqrt(op);
+            break;
+        case LOG_OPER:
+            out->value = log(op);
+            break;
+        case EXP2_OPER:
+            out->value = exp2(op);
+            break;
+        case CBRT_OPER:
+            out->value = cbrt(op);
+            break;
+        case SIN_OPER:
+            out->value = sin(op);
+            break;
+        case COS_OPER:
+            out->value = cos(op);
+            break;
+        case TAN_OPER:
+            out->value = tan(op);
+            break;
+        default:
+            break;
     }
-
-    PARAM_LIST *paramList = calloc(1, sizeof(PARAM_LIST));
-
-    // Find out length
-
-    AST_NODE *cN = p->data.function.opList;
-    paramList->length = 0;
-    while(cN != NULL) {
-        paramList->length++;
-        cN = cN->next;
-    }
-
-    paramList->values = calloc(paramList->length, sizeof(RETURN_VALUE));
-
-    // Eval operands
-    paramList->allInts = true;
-    cN = p->data.function.opList;
-    int i = 0;
-    while (cN != NULL) {
-        paramList->values[i] = eval(cN);
-        if(paramList->values[i].type != INTEGER_TYPE) {
-            paramList->allInts = false;
-        }
-        cN = cN->next;
-        i++;
-    }
-
-    return paramList;
-
 }
 
-void freeParamList(PARAM_LIST *paramList) {
-    if(!paramList) {
-        return;
+void evalBinary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
+    if (opList->next == NULL) {
+        yyerror("Expected two params for operation.");
     }
-    free(paramList->values);
-    free(paramList);
-}
-
-RETURN_VALUE evalFunc(AST_NODE *p) {
-    PARAM_LIST *params = getParamList(p);
-    if(params == NULL || params->length <= 0) {
-        yyerror("Invalid parameters");
-    }
-    bool hasOp2 = params->length >= 2;
-    RETURN_VALUE p1 = params->values[0];
-    RETURN_VALUE p2;
-    if(hasOp2) {
-        p2 = params->values[1];
+    RETURN_VALUE p1 = eval(opList);
+    RETURN_VALUE p2 = eval(opList->next);
+    out->type = REAL_TYPE;
+    if(p1.type == INTEGER_TYPE && p2.type == INTEGER_TYPE) {
+        out->type = INTEGER_TYPE;
     }
     double op1 = p1.value;
     double op2 = p2.value;
+    switch (operation) {
+        case SUB_OPER:
+            out->value = op1 - op2;
+            break;
+        case DIV_OPER:
+            if(isnan(op2) || op2 == 0) {
+                out->value = NaN;
+                out->type = NO_TYPE;
+            } else {
+                out->value = op1 / op2;
+            }
+            break;
+        case REMAINDER_OPER:
+            out->value = remainder(op1, op2);
+            break;
+        case POW_OPER:
+            out->value = pow(op1, op2);
+            break;
+        case MAX_OPER:
+            out->value = fmax(op1, op2);
+            break;
+        case MIN_OPER:
+            out->value = fmin(op1, op2);
+            break;
+        case HYPOT_OPER:
+            out->value = hypot(op1, op2);
+            break;
+        default:
+            break;
+    }
+}
+
+void printFunc(RETURN_VALUE *out, RETURN_VALUE param , bool isFirst) {
+    if(isFirst) {
+        printf("=> ");
+    }
+    out->type = param.type;
+    out->value = param.value;
+    if(param.type == INTEGER_TYPE) {
+        out->value = (int) out->value;
+        printf("%d ", (int) out->value);
+    } else {
+        printf("%.2lf ", out->value);
+    }
+}
+
+void evalArbitrary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
+    if(!opList) {
+        return;
+    }
+    RETURN_VALUE param1 = eval(opList);
+    out->value = param1.value;
+    out->type = param1.type == NO_TYPE ? REAL_TYPE : param1.type;
+
+    AST_NODE *cN = opList->next;
+    if(operation == PRINT_OPER) printFunc(out, param1, true);
+    while (cN != NULL) {
+        RETURN_VALUE param = eval(cN);
+        if(out->type == INTEGER_TYPE && param.type != INTEGER_TYPE) {
+            out->type = REAL_TYPE;
+        }
+        switch (operation) {
+            case ADD_OPER:
+                out->value += param.value;
+                break;
+            case MULT_OPER:
+                out->value *= param.value;
+                break;
+            case PRINT_OPER:
+                printFunc(out, param, false);
+                break;
+            default:
+                break;
+        }
+        cN = cN->next;
+    }
+
+}
+
+RETURN_VALUE evalFunc(AST_NODE *p) {
     RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
-    result->type = params->allInts ? INTEGER_TYPE : REAL_TYPE;
+    result->type = NO_TYPE;
     OPER_TYPE op = resolveFunc(p->data.function.name);
     switch (op) {
         case NEG_OPER:
-            result->type = p1.type;
-            result->value = -op1;
-            break;
         case ABS_OPER:
-            result->type = p1.type;
-            result->value = fabs(op1);
-            break;
         case EXP_OPER:
-            result->type = p1.type;
-            result->value = exp(op1);
-            break;
         case SQRT_OPER:
-            result->type = p1.type;
-            result->value = sqrt(op1);
-            break;
-        case ADD_OPER:
-            result->value = op1;
-            for(int i = 1; i < params->length; i++) {
-                result->value += params->values[i].value;
-            }
+        case LOG_OPER:
+        case EXP2_OPER:
+        case CBRT_OPER:
+        case SIN_OPER:
+        case COS_OPER:
+        case TAN_OPER:
+            evalUnary(result, op, p, p->data.function.opList);
             break;
         case SUB_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function sub");
-            }
-            result->value = op1 - op2;
-            break;
-        case MULT_OPER:
-            result->value = op1;
-            for(int i = 1; i < params->length; i++) {
-                result->value *= params->values[i].value;
-            }
-            break;
         case DIV_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function div");
-            }
-            if (isnan(op2) || op2 == 0) {
-                result->value = NaN;
-                break;
-            }
-            result->value = op1 / op2;
-            break;
         case REMAINDER_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function remainder");
-            }
-            result->value = remainder(op1, op2);
-            break;
-        case LOG_OPER:
-            result->type = p1.type;
-            result->value = log(op1);
-            break;
         case POW_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function pow");
-            }
-            result->value = pow(op1, op2);
-            break;
         case MAX_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function max");
-            }
-            result->value = fmax(op1, op2);
-            break;
         case MIN_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function min");
-            }
-            result->value = fmin(op1, op2);
-            break;
-        case EXP2_OPER:
-            result->type = p1.type;
-            result->value = exp2(op1);
-            break;
-        case CBRT_OPER:
-            result->type = p1.type;
-            result->value = cbrt(op1);
-            break;
         case HYPOT_OPER:
-            if(!hasOp2) {
-                yyerror("ERROR: Not enough parameters for function hypot");
-            }
-            result->value = hypot(op1, op2);
+            evalBinary(result, op, p, p->data.function.opList);
+            break;
+        case ADD_OPER:
+        case MULT_OPER:
+        case PRINT_OPER:
+            evalArbitrary(result, op, p, p->data.function.opList);
             break;
         case CUSTOM_FUNC:
-            break;
-        case SIN_OPER:
-            result->type = p1.type;
-            result->value = sin(op1);
-            break;
-        case COS_OPER:
-            result->type = p1.type;
-            result->value = cos(op1);
-            break;
-        case TAN_OPER:
-            result->type = p1.type;
-            result->value = tan(op1);
-            break;
-        case PRINT_OPER:
-            for(int i = 0; i < params->length; i++) {
-                result->type = params->values[i].type;
-                switch (result->type) {
-                    case NO_TYPE:
-                    case REAL_TYPE:
-                        result->value = params->values[i].value;
-                        printf("=> %.2f ", result->value);
-                        break;
-                    case INTEGER_TYPE:
-                        result->value = (int) params->values[i].value;
-                        printf("=> %d ", (int) result->value);
-                        break;
-                }
-            }
+        default:
             break;
     }
-    freeParamList(params);
     return *result;
 }
 
@@ -309,7 +298,7 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
         while (cN != NULL) {
             if (strcmp(cN->ident, p->data.symbol.name) == 0) {
                 double literalVal = eval(cN->val).value;
-                if(cN->val_type == INTEGER_TYPE) {
+                if (cN->val_type == INTEGER_TYPE) {
                     literalVal = (int) literalVal;
                 }
                 RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
@@ -349,7 +338,7 @@ RETURN_VALUE one() {
 // p points to the root
 //
 RETURN_VALUE eval(AST_NODE *p) {
-    if (!p){
+    if (!p) {
         return zero();
     }
 
@@ -371,18 +360,18 @@ RETURN_VALUE eval(AST_NODE *p) {
     return zero();
 }
 
-SYMBOL_TABLE_NODE *createSymbol(char* type, char *symbol, AST_NODE *s_expr) {
+SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
     SYMBOL_TABLE_NODE *p = malloc(sizeof(SYMBOL_TABLE_NODE));
 
     if (p == NULL) {
         yyerror("out of memory");
     }
 
-    if(type == NULL) {
+    if (type == NULL) {
         p->val_type = NO_TYPE;
-    } else if(strcmp(type, "real") == 0) {
+    } else if (strcmp(type, "real") == 0) {
         p->val_type = REAL_TYPE;
-    } else if(strcmp(type, "integer") == 0) {
+    } else if (strcmp(type, "integer") == 0) {
         p->val_type = INTEGER_TYPE;
     } else {
         p->val_type = NO_TYPE;
@@ -403,7 +392,7 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
         return let_list;
     }
     SYMBOL_TABLE_NODE *symbol = findSymbol(let_list, let_elem);
-    if(symbol == NULL) {
+    if (symbol == NULL) {
         let_elem->next = let_list;
         return let_elem;
     } else {
@@ -451,12 +440,12 @@ void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
 }
 
 SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol) {
-    if(symbol == NULL) {
+    if (symbol == NULL) {
         return NULL;
     }
     SYMBOL_TABLE_NODE *cNode = symbolTable;
-    while(cNode != NULL) {
-        if(strcmp(cNode->ident, symbol->ident) == 0) {
+    while (cNode != NULL) {
+        if (strcmp(cNode->ident, symbol->ident) == 0) {
             return cNode;
         }
         cNode = cNode->next;
@@ -465,7 +454,7 @@ SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE 
 }
 
 AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list) {
-    if(toAdd == NULL) {
+    if (toAdd == NULL) {
         return list;
     }
 

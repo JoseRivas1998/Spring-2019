@@ -85,12 +85,6 @@ typedef struct ast_node {
     struct ast_node *next;
 } AST_NODE;
 
-typedef struct param_list {
-    int length;
-    RETURN_VALUE *values;
-    bool allInts;
-} PARAM_LIST;
-
 AST_NODE *real_number(double value);
 AST_NODE *int_number(int value);
 
@@ -120,6 +114,7 @@ AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr);
 AST_NODE *symbol(char *symb);
 
 void freeSymbolTable(SYMBOL_TABLE_NODE *node);
+
 SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol);
 
 AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list);

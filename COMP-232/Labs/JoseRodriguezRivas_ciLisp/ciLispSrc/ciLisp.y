@@ -13,7 +13,7 @@
 %token <dval> REAL_NUMBER INTEGER_NUMBER
 %token LPAREN RPAREN EOL QUIT LET
 
-%type <astNode> s_expr f_expr
+%type <astNode> s_expr s_expr_list
 %type <symbolNode> let_elem let_section let_list
 
 %%
@@ -38,8 +38,8 @@ s_expr:
 	| SYMBOL {
 	$$ = symbol($1);
 	}
-	| f_expr {
-	$$ = $1;
+	| LPAREN FUNC s_expr_list RPAREN {
+	$$ = function($2, $3);
 	}
 	| LPAREN let_section s_expr RPAREN {
 	$$ = setSymbolTable($2, $3);
@@ -49,20 +49,21 @@ s_expr:
 	exit(EXIT_SUCCESS);
 	}
 	| error {
-	fprintf(stderr, "yacc: s_expr ::= error\n");
+	fprintf(stderr, "yacc: s_expr ::= error%s\n");
 	yyerror("unexpected token");
 	$$ = NULL;
 	};
-
-f_expr:
-	LPAREN FUNC s_expr RPAREN {
-	fprintf(stderr, "yacc: s_expr ::= LPAREN FUNC expr RPAREN\n");
-	$$ = function($2, $3, 0);
+s_expr_list:
+	s_expr s_expr_list {
+	$$ = addNodeToList($1, $2);
 	}
-	| LPAREN FUNC s_expr s_expr RPAREN {
-	fprintf(stderr, "yacc: s_expr ::= LPAREN FUNC expr expr RPAREN\n");
-	$$ = function($2, $3, $4);
-	};
+	| s_expr {
+	$$ = $1;
+	}
+	| /*empty*/ {
+	$$ = NULL;
+	}
+
 let_section:
 	/*empty*/{
 		$$ = NULL;

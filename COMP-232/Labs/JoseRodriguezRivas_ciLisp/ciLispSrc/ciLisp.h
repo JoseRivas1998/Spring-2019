@@ -59,8 +59,7 @@ typedef struct {
 
 typedef struct {
     char *name;
-    struct ast_node *op1;
-    struct ast_node *op2;
+    struct ast_node *opList;
 } FUNCTION_AST_NODE;
 
 typedef struct symbol_table_node {
@@ -83,12 +82,19 @@ typedef struct ast_node {
         FUNCTION_AST_NODE function;
         SYMBOL_AST_NODE symbol;
     } data;
+    struct ast_node *next;
 } AST_NODE;
+
+typedef struct param_list {
+    int length;
+    RETURN_VALUE *values;
+    bool allInts;
+} PARAM_LIST;
 
 AST_NODE *real_number(double value);
 AST_NODE *int_number(int value);
 
-AST_NODE *function(char *funcName, AST_NODE *op1, AST_NODE *op2);
+AST_NODE *function(char *funcName, AST_NODE *opList);
 
 void freeNode(AST_NODE *p);
 
@@ -115,5 +121,7 @@ AST_NODE *symbol(char *symb);
 
 void freeSymbolTable(SYMBOL_TABLE_NODE *node);
 SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol);
+
+AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list);
 
 #endif

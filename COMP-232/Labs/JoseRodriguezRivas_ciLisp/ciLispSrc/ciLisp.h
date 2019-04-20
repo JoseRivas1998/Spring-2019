@@ -37,13 +37,14 @@ typedef enum oper { // must be in sync with funcs in resolveFunc()
     COS_OPER, // 17
     TAN_OPER, // 18
     PRINT_OPER, // 19
+    READ_OPER,
     CUSTOM_FUNC=255
 } OPER_TYPE;
 
 OPER_TYPE resolveFunc(char *);
 
 typedef enum {
-    NUM_TYPE, FUNC_TYPE, SYMBOL_TYPE
+    NUM_TYPE, FUNC_TYPE, SYMBOL_TYPE, COND_TYPE
 } AST_NODE_TYPE;
 
 typedef enum { NO_TYPE, INTEGER_TYPE, REAL_TYPE } DATA_TYPE;
@@ -73,6 +74,12 @@ typedef struct symbol_ast_node {
     char *name;
 } SYMBOL_AST_NODE;
 
+typedef struct {
+    struct ast_node *cond;
+    struct ast_node *zero;
+    struct ast_node *nonzero;
+} COND_AST_NODE;
+
 typedef struct ast_node {
     AST_NODE_TYPE type;
     SYMBOL_TABLE_NODE *symbolTable;
@@ -80,6 +87,7 @@ typedef struct ast_node {
     union {
         NUMBER_AST_NODE number;
         FUNCTION_AST_NODE function;
+        COND_AST_NODE condition;
         SYMBOL_AST_NODE symbol;
     } data;
     struct ast_node *next;
@@ -89,6 +97,8 @@ AST_NODE *real_number(double value);
 AST_NODE *int_number(int value);
 
 AST_NODE *function(char *funcName, AST_NODE *opList);
+
+AST_NODE *conditional(AST_NODE *cond, AST_NODE *zero, AST_NODE *nonzero);
 
 void freeNode(AST_NODE *p);
 

@@ -9,7 +9,7 @@
 digit [0-9]
 integer_number [+-]?{digit}+
 real_number {integer_number}\.{digit}+
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"|"sin"|"cos"|"tan"|"print"
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"|"sin"|"cos"|"tan"|"print"|"read"
 letter [a-zA-Z]
 symbol {letter}+
 %%
@@ -26,11 +26,18 @@ symbol {letter}+
     return INTEGER_NUMBER;
     }
 
+"cond" {
+    fprintf(stderr, "lex: COND\n");
+    return COND;
+    }
+
 "quit"|"exit"|"QQ"|"/ff" {
+    fprintf(stderr, "lex: QUIT\n");
     return QUIT;
     }
 
 "let" {
+    fprintf(stderr, "lex: LET\n");
     return LET;
     }
 

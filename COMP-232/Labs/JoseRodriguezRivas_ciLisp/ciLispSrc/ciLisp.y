@@ -11,7 +11,7 @@
 
 %token <sval> FUNC SYMBOL TYPE
 %token <dval> REAL_NUMBER INTEGER_NUMBER
-%token LPAREN RPAREN EOL QUIT LET
+%token LPAREN RPAREN EOL QUIT LET COND
 
 %type <astNode> s_expr s_expr_list
 %type <symbolNode> let_elem let_section let_list
@@ -41,6 +41,10 @@ s_expr:
 	| LPAREN FUNC s_expr_list RPAREN {
 	$$ = function($2, $3);
 	}
+	| LPAREN COND s_expr s_expr s_expr RPAREN {
+	fprintf(stderr, "yacc: LPAREN COND s_expr s_expr s_expr RPAREN\n");
+	$$ = conditional($3, $4, $5);
+	}
 	| LPAREN let_section s_expr RPAREN {
 	$$ = setSymbolTable($2, $3);
 	}
@@ -49,7 +53,7 @@ s_expr:
 	exit(EXIT_SUCCESS);
 	}
 	| error {
-	fprintf(stderr, "yacc: s_expr ::= error%s\n");
+	fprintf(stderr, "yacc: s_expr ::= error\n");
 	yyerror("unexpected token");
 	$$ = NULL;
 	};

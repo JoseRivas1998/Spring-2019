@@ -99,6 +99,25 @@ AST_NODE *function(char *funcName, AST_NODE *opList) {
     return p;
 }
 
+AST_NODE *conditional(AST_NODE *cond, AST_NODE *zero, AST_NODE *nonzero) {
+    AST_NODE *p = calloc(1, sizeof(AST_NODE));
+    if(p == NULL) {
+        yyerror("Out of memory");
+    }
+
+    p->type = COND_TYPE;
+    p->data.condition.cond = cond;
+    p->data.condition.zero = zero;
+    p->data.condition.nonzero = nonzero;
+
+    cond->parent = p;
+    zero->parent = p;
+    nonzero->parent = p;
+
+    return p;
+
+}
+
 //
 // free a node
 //
@@ -120,6 +139,22 @@ void freeNode(AST_NODE *p) {
     freeSymbolTable(p->symbolTable);
 
     free(p);
+}
+
+void evalParamless(RETURN_VALUE *out, OPER_TYPE operation) {
+    switch (operation) {
+        case READ_OPER:
+            printf("read := ");
+            scanf("%lf", &out->value);
+            if(floor(out->value) == out->value) {
+                out->type = INTEGER_TYPE;
+            } else {
+                out->type = REAL_TYPE;
+            }
+            break;
+        default:
+            break;
+    }
 }
 
 void evalUnary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
@@ -284,6 +319,8 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
         case PRINT_OPER:
             evalArbitrary(result, op, p, p->data.function.opList);
             break;
+        case READ_OPER:
+            evalParamless(result, op);
         case CUSTOM_FUNC:
         default:
             break;
@@ -304,6 +341,19 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
                 RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
                 result->type = cN->val_type;
                 result->value = literalVal;
+                if(cN->val->type == FUNC_TYPE) {
+                    OPER_TYPE operType = resolveFunc(cN->val->data.function.name);
+                    if(operType == READ_OPER) {
+                        AST_NODE *newVal;
+                        if(result->type == INTEGER_TYPE) {
+                            newVal = int_number((int) result->value);
+                        } else {
+                            newVal = real_number(result->value);
+                        }
+                        freeNode(cN->val);
+                        cN->val = newVal;
+                    }
+                }
                 return *result;
             }
             cN = cN->next;

@@ -9,7 +9,7 @@
 digit [0-9]
 integer_number [+-]?{digit}+
 real_number {integer_number}\.{digit}+
-func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"|"sin"|"cos"|"tan"|"print"|"read"
+func "neg"|"abs"|"exp"|"sqrt"|"add"|"sub"|"mult"|"div"|"remainder"|"log"|"pow"|"max"|"min"|"exp2"|"cbrt"|"hypot"|"sin"|"cos"|"tan"|"print"|"read"|"rand"|"equal"|"smaller"|"larger"
 letter [a-zA-Z]
 symbol {letter}+
 %%

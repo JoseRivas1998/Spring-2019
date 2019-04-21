@@ -7,6 +7,7 @@
 #include <string.h>
 #include <math.h>
 #include <stdbool.h>
+#include <time.h>
 
 #include "ciLispParser.h"
 
@@ -38,6 +39,10 @@ typedef enum oper { // must be in sync with funcs in resolveFunc()
     TAN_OPER, // 18
     PRINT_OPER, // 19
     READ_OPER,
+    RAND_OPER,
+    EQUAL_OPER,
+    SMALLER_OPER,
+    LARGER_OPER,
     CUSTOM_FUNC=255
 } OPER_TYPE;
 
@@ -98,7 +103,7 @@ AST_NODE *int_number(int value);
 
 AST_NODE *function(char *funcName, AST_NODE *opList);
 
-AST_NODE *conditional(AST_NODE *cond, AST_NODE *zero, AST_NODE *nonzero);
+AST_NODE *conditional(AST_NODE *cond, AST_NODE *nonzero, AST_NODE *zero);
 
 void freeNode(AST_NODE *p);
 

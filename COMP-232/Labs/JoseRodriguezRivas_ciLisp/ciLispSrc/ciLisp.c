@@ -41,6 +41,8 @@ char *func[] = {
         ""
 };
 
+bool seeded = false;
+
 OPER_TYPE resolveFunc(char *funcName) {
     int i = 0;
     while (func[i][0] != '\0') {
@@ -99,7 +101,7 @@ AST_NODE *function(char *funcName, AST_NODE *opList) {
     return p;
 }
 
-AST_NODE *conditional(AST_NODE *cond, AST_NODE *zero, AST_NODE *nonzero) {
+AST_NODE *conditional(AST_NODE *cond, AST_NODE *nonzero, AST_NODE *zero) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if(p == NULL) {
         yyerror("Out of memory");
@@ -107,8 +109,8 @@ AST_NODE *conditional(AST_NODE *cond, AST_NODE *zero, AST_NODE *nonzero) {
 
     p->type = COND_TYPE;
     p->data.condition.cond = cond;
-    p->data.condition.zero = zero;
     p->data.condition.nonzero = nonzero;
+    p->data.condition.zero = zero;
 
     cond->parent = p;
     zero->parent = p;
@@ -136,9 +138,24 @@ void freeNode(AST_NODE *p) {
         free(p->data.symbol.name);
     }
 
+    if(p->type == COND_TYPE) {
+        freeNode(p->data.condition.cond);
+        freeNode(p->data.condition.nonzero);
+        freeNode(p->data.condition.zero);
+    }
+
     freeSymbolTable(p->symbolTable);
 
     free(p);
+}
+
+double getRand() {
+    time_t t;
+    if(!seeded) {
+        srand((unsigned) time(&t));
+        seeded = true;
+    }
+    return rand();
 }
 
 void evalParamless(RETURN_VALUE *out, OPER_TYPE operation) {
@@ -146,12 +163,12 @@ void evalParamless(RETURN_VALUE *out, OPER_TYPE operation) {
         case READ_OPER:
             printf("read := ");
             scanf("%lf", &out->value);
-            if(floor(out->value) == out->value) {
-                out->type = INTEGER_TYPE;
-            } else {
-                out->type = REAL_TYPE;
-            }
+            out->type = floor(out->value) == out->value ? INTEGER_TYPE : REAL_TYPE;
+            while ((getchar()) != '\n');
             break;
+        case RAND_OPER:
+            out->value = getRand();
+            out->type = floor(out->value) == out->value ? INTEGER_TYPE : REAL_TYPE;
         default:
             break;
     }
@@ -236,6 +253,18 @@ void evalBinary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *o
         case HYPOT_OPER:
             out->value = hypot(op1, op2);
             break;
+        case EQUAL_OPER:
+            out->type = INTEGER_TYPE;
+            out->value = op1 == op2 ? 1 : 0;
+            break;
+        case LARGER_OPER:
+            out->type = INTEGER_TYPE;
+            out->value = op1 > op2 ? 1 : 0;
+            break;
+        case SMALLER_OPER:
+            out->type = INTEGER_TYPE;
+            out->value = op1 < op2 ? 1 : 0;
+            break;
         default:
             break;
     }
@@ -312,6 +341,9 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
         case MAX_OPER:
         case MIN_OPER:
         case HYPOT_OPER:
+        case EQUAL_OPER:
+        case SMALLER_OPER:
+        case LARGER_OPER:
             evalBinary(result, op, p, p->data.function.opList);
             break;
         case ADD_OPER:
@@ -320,6 +352,7 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
             evalArbitrary(result, op, p, p->data.function.opList);
             break;
         case READ_OPER:
+        case RAND_OPER:
             evalParamless(result, op);
         case CUSTOM_FUNC:
         default:
@@ -341,19 +374,6 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
                 RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
                 result->type = cN->val_type;
                 result->value = literalVal;
-                if(cN->val->type == FUNC_TYPE) {
-                    OPER_TYPE operType = resolveFunc(cN->val->data.function.name);
-                    if(operType == READ_OPER) {
-                        AST_NODE *newVal;
-                        if(result->type == INTEGER_TYPE) {
-                            newVal = int_number((int) result->value);
-                        } else {
-                            newVal = real_number(result->value);
-                        }
-                        freeNode(cN->val);
-                        cN->val = newVal;
-                    }
-                }
                 return *result;
             }
             cN = cN->next;
@@ -367,10 +387,21 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
     exit(0);
 }
 
+RETURN_VALUE evalCond(AST_NODE *p) {
+    RETURN_VALUE condition = eval(p->data.condition.cond);
+
+    if(condition.value == 0) {
+        return eval(p->data.condition.zero);
+    } else {
+        return eval(p->data.condition.nonzero);
+    }
+
+}
+
 RETURN_VALUE numVal(double num) {
     RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
-    result->type = NO_TYPE;
     result->value = num;
+    result->type = floor(num) == num ? INTEGER_TYPE : REAL_TYPE;
     return *result;
 }
 
@@ -407,6 +438,10 @@ RETURN_VALUE eval(AST_NODE *p) {
         return evalSymbol(p);
     }
 
+    if(p->type == COND_TYPE) {
+        return evalCond(p);
+    }
+
     return zero();
 }
 
@@ -430,6 +465,21 @@ SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
     p->ident = symbol;
     p->val = s_expr;
     p->next = NULL;
+
+    if(s_expr->type == FUNC_TYPE) {
+        OPER_TYPE oper = resolveFunc(s_expr->data.function.name);
+        if(oper == READ_OPER) {
+            AST_NODE *newVal;
+            RETURN_VALUE readVal = eval(s_expr);
+            if(readVal.type == INTEGER_TYPE) {
+                newVal = int_number((int) readVal.value);
+            } else {
+                newVal = real_number(readVal.value);
+            }
+            p->val = newVal;
+            freeNode(s_expr);
+        }
+    }
 
     return p;
 }

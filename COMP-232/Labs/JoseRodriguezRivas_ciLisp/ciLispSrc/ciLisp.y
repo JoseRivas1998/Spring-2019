@@ -11,10 +11,10 @@
 
 %token <sval> FUNC SYMBOL TYPE
 %token <dval> REAL_NUMBER INTEGER_NUMBER
-%token LPAREN RPAREN EOL QUIT LET COND
+%token LPAREN RPAREN EOL QUIT LET COND LAMBDA
 
 %type <astNode> s_expr s_expr_list
-%type <symbolNode> let_elem let_section let_list
+%type <symbolNode> let_elem let_section let_list arg_list
 
 %%
 
@@ -49,6 +49,9 @@ s_expr:
 	| LPAREN let_section s_expr RPAREN {
 	$$ = setSymbolTable($2, $3);
 	}
+	| LPAREN SYMBOL s_expr_list RPAREN {
+	$$ = function($2, $3);
+	}
 	| QUIT {
 	fprintf(stderr, "yacc: s_expr ::= QUIT\n");
 	exit(EXIT_SUCCESS);
@@ -81,6 +84,7 @@ let_list:
 		$$ = addSymbolToList($1, $2);
 	}
 	| LET let_elem {
+		fprintf(stderr, "yacc: LET let_elem\n");
 		$$ = $2;
 	};
 let_elem:
@@ -89,6 +93,22 @@ let_elem:
 	}
 	| LPAREN SYMBOL s_expr RPAREN {
 		$$ = createSymbol(NULL, $2, $3);
-	};
+	}
+	| LPAREN TYPE SYMBOL LAMBDA LPAREN arg_list RPAREN s_expr RPAREN {
+		$$ = createLambda($2, $3, $6, $8);
+	}
+	| LPAREN SYMBOL LAMBDA LPAREN arg_list RPAREN s_expr RPAREN {
+		fprintf(stderr, "yacc: LPAREN SYMBOL LAMBDA LPAREN arg_list RPAREN s_expr RPAREN\n");
+		$$ = createLambda(NULL, $2, $5, $7);
+	}
+arg_list:
+	SYMBOL arg_list {
+		fprintf(stderr, "yacc: SYMBOL ARG_LIST\n");
+		$$ = addSymbolToArgList($1, $2);
+	}
+	| SYMBOL {
+		fprintf(stderr, "yacc: SYMBOL\n");
+		$$ = createArgList($1);
+	}
 %%
 

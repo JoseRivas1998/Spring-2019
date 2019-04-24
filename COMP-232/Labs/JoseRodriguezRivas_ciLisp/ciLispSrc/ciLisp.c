@@ -318,6 +318,83 @@ void evalArbitrary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE
 
 }
 
+SYMBOL_TABLE_NODE *findLambda(char *lambda, AST_NODE *p) {
+    SYMBOL_TABLE_NODE *cN = p->symbolTable;
+    while(cN != NULL) {
+        if(cN->type == LAMBDA_TYPE && strcmp(lambda, cN->ident) == 0) {
+            return cN;
+        }
+        cN = cN->next;
+    }
+    if(p->parent != NULL) {
+        return findLambda(lambda, p->parent);
+    }
+    return NULL;
+
+}
+
+void pushToStack(SYMBOL_TABLE_NODE *arg, AST_NODE *val) {
+    STACK_NODE *newHead = calloc(1, sizeof(STACK_NODE));
+    newHead->next = arg->stack;
+    newHead->val = val;
+    arg->stack = newHead;
+}
+
+bool popFromStack(SYMBOL_TABLE_NODE *arg) {
+    if(arg->stack == NULL) {
+        return false;
+    }
+    STACK_NODE *newHead = arg->stack->next;
+    free(arg->stack);
+    arg->stack = newHead;
+    return true;
+}
+
+
+bool pushArgsToStack(AST_NODE *lambda, AST_NODE *opList) {
+    AST_NODE *currentOp = opList;
+    SYMBOL_TABLE_NODE *currentArg = lambda->symbolTable;
+    while(currentArg != NULL && currentOp != NULL) {
+        if(currentArg->type == ARG_TYPE) {
+            pushToStack(currentArg, currentOp);
+            currentOp = currentOp->next;
+        }
+        currentArg = currentArg->next;
+    }
+    if(currentOp != NULL) {
+        yyerror("Too many arguments");
+        return false;
+    }
+    if(currentArg != NULL) {
+        while(currentArg != NULL) {
+            if(currentArg->type == ARG_TYPE){
+                yyerror("No enough arguments");
+                return false;
+            }
+            currentArg = currentArg->next;
+        }
+    }
+    return true;
+}
+
+void popArgsFromStack(AST_NODE *lambda) {
+    SYMBOL_TABLE_NODE *currentArg = lambda->symbolTable;
+    while(currentArg != NULL) {
+        if(currentArg->type == ARG_TYPE) {
+            popFromStack(currentArg);
+        }
+        currentArg = currentArg->next;
+    }
+}
+
+void evalCustom(RETURN_VALUE *out, AST_NODE *p) {
+    SYMBOL_TABLE_NODE *lambdaNode = findLambda(p->data.function.name, p);
+    AST_NODE *lambdaValue = lambdaNode->val;
+    pushArgsToStack(lambdaValue, p->data.function.opList);
+    *out = eval(lambdaValue);
+    popArgsFromStack(lambdaValue);
+}
+
 RETURN_VALUE evalFunc(AST_NODE *p) {
     RETURN_VALUE result;
     result.type = NO_TYPE;
@@ -356,8 +433,29 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
         case RAND_OPER:
             evalParamless(&result, op);
         case CUSTOM_FUNC:
+            evalCustom(&result, p);
+            break;
         default:
             break;
+    }
+    return result;
+}
+
+RETURN_VALUE evalVariable(SYMBOL_TABLE_NODE *variable) {
+    double literalVal = eval(variable->val).value;
+    if (variable->val_type == INTEGER_TYPE) {
+        literalVal = (int) literalVal;
+    }
+    RETURN_VALUE result;
+    result.type = variable->val_type;
+    result.value = literalVal;
+    return result;
+}
+
+RETURN_VALUE evalArg(SYMBOL_TABLE_NODE *arg) {
+    RETURN_VALUE result = (RETURN_VALUE) {NO_TYPE, 0.0};
+    if(arg->stack != NULL){
+        result = eval(arg->stack->val);
     }
     return result;
 }
@@ -368,14 +466,11 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
         SYMBOL_TABLE_NODE *cN = parent->symbolTable;
         while (cN != NULL) {
             if (strcmp(cN->ident, p->data.symbol.name) == 0) {
-                double literalVal = eval(cN->val).value;
-                if (cN->val_type == INTEGER_TYPE) {
-                    literalVal = (int) literalVal;
+                if(cN->type == VARIABLE_TYPE) {
+                    return evalVariable(cN);
+                } else if(cN->type == ARG_TYPE) {
+                    return evalArg(cN);
                 }
-                RETURN_VALUE result;
-                result.type = cN->val_type;
-                result.value = literalVal;
-                return result;
             }
             cN = cN->next;
         }
@@ -451,10 +546,11 @@ SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
     p->ident = symbol;
     p->val = s_expr;
     p->next = NULL;
+    p->type = VARIABLE_TYPE;
 
     if(s_expr->type == FUNC_TYPE) {
         OPER_TYPE oper = resolveFunc(s_expr->data.function.name);
-        if(oper == READ_OPER) {
+        if(oper == READ_OPER || oper == RAND_OPER) {
             AST_NODE *newVal;
             RETURN_VALUE readVal = eval(s_expr);
             if(readVal.type == INTEGER_TYPE) {
@@ -475,7 +571,16 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
         return let_list;
     }
     if (let_elem->val == NULL) {
-        return let_list;
+        if(let_elem->type == VARIABLE_TYPE) {
+            return let_list;
+        } else {
+            if(let_elem->next == NULL) {
+                let_elem->next = let_list;
+            } else {
+                addSymbolToList(let_list, let_elem->next);
+            }
+            return let_elem;
+        }
     }
     SYMBOL_TABLE_NODE *symbol = findSymbol(let_list, let_elem);
     if (symbol == NULL) {
@@ -525,6 +630,8 @@ void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
     free(node);
 }
 
+
+
 SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol) {
     if (symbol == NULL) {
         return NULL;
@@ -546,4 +653,63 @@ AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list) {
 
     toAdd->next = list;
     return toAdd;
+}
+
+bool argInArgList(char *arg, SYMBOL_TABLE_NODE *arg_list) {
+    SYMBOL_TABLE_NODE *cN = arg_list;
+    while(cN != NULL) {
+        if(strcmp(arg, cN->ident) == 0) {
+            return true;
+        }
+        cN = cN->next;
+    }
+    return false;
+}
+
+SYMBOL_TABLE_NODE *createArgList(char *symbol) {
+    SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
+    if(!p) {
+        yyerror("Out of memory");
+    }
+    p->ident = calloc(1 + strlen(symbol), sizeof(char));
+    strcpy(p->ident, symbol);
+    p->type = ARG_TYPE;
+    return p;
+}
+
+SYMBOL_TABLE_NODE *addSymbolToArgList(char *symbol, SYMBOL_TABLE_NODE *arg_list) {
+    if(arg_list == NULL) {
+        return createArgList(symbol);
+    }
+    if(argInArgList(symbol, arg_list)) {
+        return arg_list;
+    }
+    SYMBOL_TABLE_NODE *arg = createArgList(symbol);
+    arg->next = arg_list;
+    return arg;
+}
+
+SYMBOL_TABLE_NODE *createLambda(char* type, char*ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body) {
+    SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
+    if(!p) {
+        yyerror("Out of memory");
+    }
+    if(!body) {
+        yyerror("No function body");
+    }
+    if(type == NULL) {
+        p->val_type = NO_TYPE;
+    } else if(strcmp(type, "real") == 0) {
+        p->val_type = REAL_TYPE;
+    } else if(strcmp(type, "integer") == 0) {
+        p->val_type = INTEGER_TYPE;
+    }
+
+    p->type = LAMBDA_TYPE;
+    p->ident = calloc(strlen(ident) + 1, sizeof(char));
+    strcpy(p->ident, ident);
+
+    body->symbolTable = addSymbolToList(body->symbolTable, argList);
+    p->val = body;
+    return p;
 }

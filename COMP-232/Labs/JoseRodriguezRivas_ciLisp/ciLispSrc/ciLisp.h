@@ -54,6 +54,17 @@ typedef enum {
 
 typedef enum { NO_TYPE, INTEGER_TYPE, REAL_TYPE } DATA_TYPE;
 
+typedef enum {
+    VARIABLE_TYPE,
+    LAMBDA_TYPE,
+    ARG_TYPE
+} SYM_TYPE;
+
+typedef struct stack_node {
+    struct ast_node *val;
+    struct stack_node *next;
+} STACK_NODE;
+
 typedef struct return_value {
     DATA_TYPE type;
     double value;
@@ -69,9 +80,11 @@ typedef struct {
 } FUNCTION_AST_NODE;
 
 typedef struct symbol_table_node {
+    SYM_TYPE type;
     DATA_TYPE val_type;
     char *ident;
     struct ast_node *val;
+    struct stack_node *stack;
     struct symbol_table_node *next;
 } SYMBOL_TABLE_NODE;
 
@@ -133,5 +146,13 @@ void freeSymbolTable(SYMBOL_TABLE_NODE *node);
 SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol);
 
 AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list);
+
+SYMBOL_TABLE_NODE *createArgList(char *symbol);
+
+SYMBOL_TABLE_NODE *addSymbolToArgList(char *symbol, SYMBOL_TABLE_NODE *arg_list);
+
+SYMBOL_TABLE_NODE *createLambda(char* type, char*ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body);
+
+
 
 #endif

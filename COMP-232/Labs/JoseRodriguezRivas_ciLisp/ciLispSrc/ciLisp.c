@@ -314,12 +314,13 @@ void evalArbitrary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE
         }
         cN = cN->next;
     }
+    if(operation == PRINT_OPER) printf("\n");
 
 }
 
 RETURN_VALUE evalFunc(AST_NODE *p) {
-    RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
-    result->type = NO_TYPE;
+    RETURN_VALUE result;
+    result.type = NO_TYPE;
     OPER_TYPE op = resolveFunc(p->data.function.name);
     switch (op) {
         case NEG_OPER:
@@ -332,7 +333,7 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
         case SIN_OPER:
         case COS_OPER:
         case TAN_OPER:
-            evalUnary(result, op, p, p->data.function.opList);
+            evalUnary(&result, op, p, p->data.function.opList);
             break;
         case SUB_OPER:
         case DIV_OPER:
@@ -344,21 +345,21 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
         case EQUAL_OPER:
         case SMALLER_OPER:
         case LARGER_OPER:
-            evalBinary(result, op, p, p->data.function.opList);
+            evalBinary(&result, op, p, p->data.function.opList);
             break;
         case ADD_OPER:
         case MULT_OPER:
         case PRINT_OPER:
-            evalArbitrary(result, op, p, p->data.function.opList);
+            evalArbitrary(&result, op, p, p->data.function.opList);
             break;
         case READ_OPER:
         case RAND_OPER:
-            evalParamless(result, op);
+            evalParamless(&result, op);
         case CUSTOM_FUNC:
         default:
             break;
     }
-    return *result;
+    return result;
 }
 
 RETURN_VALUE evalSymbol(AST_NODE *p) {
@@ -371,10 +372,10 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
                 if (cN->val_type == INTEGER_TYPE) {
                     literalVal = (int) literalVal;
                 }
-                RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
-                result->type = cN->val_type;
-                result->value = literalVal;
-                return *result;
+                RETURN_VALUE result;
+                result.type = cN->val_type;
+                result.value = literalVal;
+                return result;
             }
             cN = cN->next;
         }
@@ -398,51 +399,36 @@ RETURN_VALUE evalCond(AST_NODE *p) {
 
 }
 
-RETURN_VALUE numVal(double num) {
-    RETURN_VALUE *result = calloc(1, sizeof(RETURN_VALUE));
-    result->value = num;
-    result->type = floor(num) == num ? INTEGER_TYPE : REAL_TYPE;
-    return *result;
-}
-
-RETURN_VALUE zero() {
-    return numVal(0);
-}
-
-RETURN_VALUE one() {
-    return numVal(1);
-}
-
 //
 // evaluate an abstract syntax tree
 //
 // p points to the root
 //
 RETURN_VALUE eval(AST_NODE *p) {
-    if (!p) {
-        return zero();
-    }
 
+    RETURN_VALUE result = (RETURN_VALUE) {NO_TYPE, 0.0};
+    if (!p) {
+        return result;
+    }
 
 // TBD: implement
     if (p->type == NUM_TYPE) {
-
-        return p->data.number.value;
+        result = p->data.number.value;
     }
 
     if (p->type == FUNC_TYPE) {
-        return evalFunc(p);
+        result = evalFunc(p);
     }
 
     if (p->type == SYMBOL_TYPE) {
-        return evalSymbol(p);
+        result = evalSymbol(p);
     }
 
     if(p->type == COND_TYPE) {
-        return evalCond(p);
+        result = evalCond(p);
     }
 
-    return zero();
+    return result;
 }
 
 SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {

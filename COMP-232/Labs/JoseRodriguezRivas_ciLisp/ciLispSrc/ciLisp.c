@@ -9,7 +9,8 @@
 #define NaN NAN
 
 void yyerror(char *s) {
-    fprintf(stderr, "\nERROR: %s\n", s);
+    printf("\nERROR: %s\n", s);
+    exit(0);
     // note stderr that normally defaults to stdout, but can be redirected: ./src 2> src.log
     // CLion will display stderr in a different color from stdin and stdout
 }
@@ -60,9 +61,11 @@ OPER_TYPE resolveFunc(char *funcName) {
     return CUSTOM_FUNC;
 }
 
-//
-// create a node for a number
-//
+/**
+ * Create a node for a real number
+ * @param value The double value of the node
+ * @return A NUM_TYPE ast node with a real value
+ */
 AST_NODE *real_number(double value) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
@@ -75,6 +78,11 @@ AST_NODE *real_number(double value) {
     return p;
 }
 
+/**
+ * Create a node for an integer number
+ * @param value The int value of the node
+ * @return A NUM_TYPE ast node with an integer value
+ */
 AST_NODE *int_number(int value) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
@@ -87,9 +95,13 @@ AST_NODE *int_number(int value) {
     return p;
 }
 
-//
-// create a node for a function
-//
+/**
+ * Creates an ast node for a function call. <br />
+ * All nodes in opList have their parents set to the new node
+ * @param funcName The name of the function to be called
+ * @param opList The s_expressions of the operands as a linked list
+ * @return A FUNC_TYPE ast node holding the function name and the opList
+ */
 AST_NODE *function(char *funcName, AST_NODE *opList) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
@@ -107,9 +119,17 @@ AST_NODE *function(char *funcName, AST_NODE *opList) {
     return p;
 }
 
+/**
+ * Creates an ast node for a conditional expression. <br />
+ * The cond, nonzero, and zero nodes will have their parents set to the new node.
+ * @param cond The condition to be evaluated, 0 means false, a number not equal to zero means true
+ * @param nonzero The expression to evaluate when cond returns true
+ * @param zero The expression to evaluate when the cond returns false
+ * @return The COND_TYPE ast node holding the conditional statement.
+ */
 AST_NODE *conditional(AST_NODE *cond, AST_NODE *nonzero, AST_NODE *zero) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
-    if(p == NULL) {
+    if (p == NULL) {
         yyerror("Out of memory");
     }
 
@@ -126,9 +146,11 @@ AST_NODE *conditional(AST_NODE *cond, AST_NODE *nonzero, AST_NODE *zero) {
 
 }
 
-//
-// free a node
-//
+/**
+ * Recursively frees all nodes in the given chain.<br/>
+ * Also frees all string identifiers, symbol tables, and other embedded ast nodes.
+ * @param p
+ */
 void freeNode(AST_NODE *p) {
     if (!p)
         return;
@@ -144,7 +166,7 @@ void freeNode(AST_NODE *p) {
         free(p->data.symbol.name);
     }
 
-    if(p->type == COND_TYPE) {
+    if (p->type == COND_TYPE) {
         freeNode(p->data.condition.cond);
         freeNode(p->data.condition.nonzero);
         freeNode(p->data.condition.zero);
@@ -155,15 +177,25 @@ void freeNode(AST_NODE *p) {
     free(p);
 }
 
+/**
+ * Generates a pseudorandom number using rand().<br/>
+ * If the generator has not been seeded, srand() is called with current time.
+ * @return
+ */
 double getRand() {
     time_t t;
-    if(!seeded) {
+    if (!seeded) {
         srand((unsigned) time(&t));
         seeded = true;
     }
     return rand();
 }
 
+/**
+ * Evaluates a function with no parameters
+ * @param out The reference to the return value that will be returned
+ * @param operation The operation to evalulate
+ */
 void evalParamless(RETURN_VALUE *out, OPER_TYPE operation) {
     switch (operation) {
         case READ_OPER:
@@ -180,10 +212,20 @@ void evalParamless(RETURN_VALUE *out, OPER_TYPE operation) {
     }
 }
 
+/**
+ * Evaluates a function that takes one operand
+ * @param out The reference to the return value that will be returned
+ * @param operation The operation to evaluate
+ * @param p The original s_expr (unused)
+ * @param opList The operand list of the function call
+ */
 void evalUnary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
     RETURN_VALUE p1 = eval(opList);
     double op = p1.value;
     out->type = p1.type;
+    if (opList->next != NULL) {
+        printf("WARNING: Too many arguments for operation %s\n", func[operation]);
+    }
     switch (operation) {
         case NEG_OPER:
             out->value = -op;
@@ -220,24 +262,35 @@ void evalUnary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *op
     }
 }
 
+/**
+ * Evaluates a function that takes two operands.
+ * @param out The reference to the return value that will be returned
+ * @param operation The operation to evaluate
+ * @param p The original s_expr (unused)
+ * @param opList The operand list of the function call
+ */
 void evalBinary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
     if (opList->next == NULL) {
-        yyerror("Expected two params for operation.");
+        printf("Expected two params for operation: %s\n", func[operation]);
+        return;
     }
     RETURN_VALUE p1 = eval(opList);
     RETURN_VALUE p2 = eval(opList->next);
     out->type = REAL_TYPE;
-    if(p1.type == INTEGER_TYPE && p2.type == INTEGER_TYPE) {
+    if (p1.type == INTEGER_TYPE && p2.type == INTEGER_TYPE) {
         out->type = INTEGER_TYPE;
     }
     double op1 = p1.value;
     double op2 = p2.value;
+    if (opList->next->next != NULL) {
+        printf("WARNING: Too many arguments for operation: %s\n", func[operation]);
+    }
     switch (operation) {
         case SUB_OPER:
             out->value = op1 - op2;
             break;
         case DIV_OPER:
-            if(isnan(op2) || op2 == 0) {
+            if (isnan(op2) || op2 == 0) {
                 out->value = NaN;
                 out->type = NO_TYPE;
             } else {
@@ -276,13 +329,19 @@ void evalBinary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *o
     }
 }
 
-void printFunc(RETURN_VALUE *out, RETURN_VALUE param , bool isFirst) {
-    if(isFirst) {
+/**
+ * Logic for the print function.
+ * @param out The reference to the return value that will be returned
+ * @param param The value to print
+ * @param isFirst Determines whether to print the "=> "
+ */
+void printFunc(RETURN_VALUE *out, RETURN_VALUE param, bool isFirst) {
+    if (isFirst) {
         printf("=> ");
     }
     out->type = param.type;
     out->value = param.value;
-    if(param.type == INTEGER_TYPE) {
+    if (param.type == INTEGER_TYPE) {
         out->value = (int) out->value;
         printf("%d ", (int) out->value);
     } else {
@@ -290,8 +349,15 @@ void printFunc(RETURN_VALUE *out, RETURN_VALUE param , bool isFirst) {
     }
 }
 
+/**
+ * Evaluates a function with any number of params
+ * @param out The reference to the return value that will be returned
+ * @param operation The operation to evaluate
+ * @param p The original s_expr (unused)
+ * @param opList The operand list of the function call
+ */
 void evalArbitrary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE *opList) {
-    if(!opList) {
+    if (!opList) {
         return;
     }
     RETURN_VALUE param1 = eval(opList);
@@ -299,10 +365,10 @@ void evalArbitrary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE
     out->type = param1.type == NO_TYPE ? REAL_TYPE : param1.type;
 
     AST_NODE *cN = opList->next;
-    if(operation == PRINT_OPER) printFunc(out, param1, true);
+    if (operation == PRINT_OPER) printFunc(out, param1, true);
     while (cN != NULL) {
         RETURN_VALUE param = eval(cN);
-        if(out->type == INTEGER_TYPE && param.type != INTEGER_TYPE) {
+        if (out->type == INTEGER_TYPE && param.type != INTEGER_TYPE) {
             out->type = REAL_TYPE;
         }
         switch (operation) {
@@ -320,30 +386,43 @@ void evalArbitrary(RETURN_VALUE *out, OPER_TYPE operation, AST_NODE *p, AST_NODE
         }
         cN = cN->next;
     }
-    if(operation == PRINT_OPER) printf("\n");
+    if (operation == PRINT_OPER) printf("\n");
 
 }
 
+/**
+ * Finds the user defined function with the given name.<br />
+ * Recursively searches through the parent of the given node.
+ * @param lambda The name of the function to search for
+ * @param p The lowest scope to search.
+ * @return The symbol table node containing the function, or null if it was not found.
+ */
 SYMBOL_TABLE_NODE *findLambda(char *lambda, AST_NODE *p) {
     SYMBOL_TABLE_NODE *cN = p->symbolTable;
-    while(cN != NULL) {
-        if(cN->type == LAMBDA_TYPE && strcmp(lambda, cN->ident) == 0) {
+    while (cN != NULL) {
+        if (cN->type == LAMBDA_TYPE && strcmp(lambda, cN->ident) == 0) {
             return cN;
         }
         cN = cN->next;
     }
-    if(p->parent != NULL) {
+    if (p->parent != NULL) {
         return findLambda(lambda, p->parent);
     }
     return NULL;
 
 }
 
+/**
+ * Pushes an expression to the given argument stack.<br/>
+ * The expression is evaluated and pushed as a NUM_TYPE node.
+ * @param arg The argument to push to the stack
+ * @param val The expression that will be evaluated
+ */
 void pushToStack(SYMBOL_TABLE_NODE *arg, AST_NODE *val) {
     STACK_NODE *newHead = calloc(1, sizeof(STACK_NODE));
     newHead->next = arg->stack;
     RETURN_VALUE actualValue = eval(val);
-    if(actualValue.type == INTEGER_TYPE) {
+    if (actualValue.type == INTEGER_TYPE) {
         newHead->val = int_number((int) actualValue.value);
     } else {
         newHead->val = real_number((actualValue.value));
@@ -351,8 +430,13 @@ void pushToStack(SYMBOL_TABLE_NODE *arg, AST_NODE *val) {
     arg->stack = newHead;
 }
 
+/**
+ * Pops the top off the given arg's stack.
+ * @param arg The arg to pop the stack
+ * @return False if the stack was empty, true if it was not.
+ */
 bool popFromStack(SYMBOL_TABLE_NODE *arg) {
-    if(arg->stack == NULL) {
+    if (arg->stack == NULL) {
         return false;
     }
     STACK_NODE *newHead = arg->stack->next;
@@ -362,24 +446,31 @@ bool popFromStack(SYMBOL_TABLE_NODE *arg) {
     return true;
 }
 
-
+/**
+ * Pushes the given opList to the correct args in given s_expr.<br/>
+ * Accounts for the fact that lambda may have non argument variables.<br/>
+ * Reports if there were too many arguments given, or too little.
+ * @param lambda
+ * @param opList
+ * @return
+ */
 bool pushArgsToStack(AST_NODE *lambda, AST_NODE *opList) {
     AST_NODE *currentOp = opList;
     SYMBOL_TABLE_NODE *currentArg = lambda->symbolTable;
-    while(currentArg != NULL && currentOp != NULL) {
-        if(currentArg->type == ARG_TYPE) {
+    while (currentArg != NULL && currentOp != NULL) {
+        if (currentArg->type == ARG_TYPE) {
             pushToStack(currentArg, currentOp);
             currentOp = currentOp->next;
         }
         currentArg = currentArg->next;
     }
-    if(currentOp != NULL) {
+    if (currentOp != NULL) {
         yyerror("Too many arguments");
         return false;
     }
-    if(currentArg != NULL) {
-        while(currentArg != NULL) {
-            if(currentArg->type == ARG_TYPE){
+    if (currentArg != NULL) {
+        while (currentArg != NULL) {
+            if (currentArg->type == ARG_TYPE) {
                 yyerror("No enough arguments");
                 return false;
             }
@@ -389,16 +480,25 @@ bool pushArgsToStack(AST_NODE *lambda, AST_NODE *opList) {
     return true;
 }
 
+/**
+ * Pops all arguments for the given function once
+ * @param lambda
+ */
 void popArgsFromStack(AST_NODE *lambda) {
     SYMBOL_TABLE_NODE *currentArg = lambda->symbolTable;
-    while(currentArg != NULL) {
-        if(currentArg->type == ARG_TYPE) {
+    while (currentArg != NULL) {
+        if (currentArg->type == ARG_TYPE) {
             popFromStack(currentArg);
         }
         currentArg = currentArg->next;
     }
 }
 
+/**
+ * Evaluates a custom function
+ * @param out The return value to store output of function
+ * @param p The function to evaluate.
+ */
 void evalCustom(RETURN_VALUE *out, AST_NODE *p) {
     SYMBOL_TABLE_NODE *lambdaNode = findLambda(p->data.function.name, p);
     AST_NODE *lambdaValue = lambdaNode->val;
@@ -407,6 +507,11 @@ void evalCustom(RETURN_VALUE *out, AST_NODE *p) {
     popArgsFromStack(lambdaValue);
 }
 
+/**
+ * Evaluates a function node
+ * @param p The node to evaluate
+ * @return The result of the function call
+ */
 RETURN_VALUE evalFunc(AST_NODE *p) {
     RETURN_VALUE result;
     result.type = NO_TYPE;
@@ -454,6 +559,11 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
     return result;
 }
 
+/**
+ * Evalates a variable symbol
+ * @param variable The variable to evaluate
+ * @return The value stored in the variable
+ */
 RETURN_VALUE evalVariable(SYMBOL_TABLE_NODE *variable) {
     double literalVal = eval(variable->val).value;
     if (variable->val_type == INTEGER_TYPE) {
@@ -465,23 +575,34 @@ RETURN_VALUE evalVariable(SYMBOL_TABLE_NODE *variable) {
     return result;
 }
 
+/**
+ * Evaluates the top of the given arg's stack
+ * @param arg The arg to evaluate
+ * @return The value at the top of the arg's stack, or zero if it was null
+ */
 RETURN_VALUE evalArg(SYMBOL_TABLE_NODE *arg) {
     RETURN_VALUE result = (RETURN_VALUE) {NO_TYPE, 0.0};
-    if(arg->stack != NULL){
+    if (arg->stack != NULL) {
         result = eval(arg->stack->val);
     }
     return result;
 }
 
+/**
+ * Evaluates a symbol node, should only be for variables and args. <br/>
+ * Uses a nested loop to search up the scope of the symbol.
+ * @param p The symbol node
+ * @return The value at the given symbol.
+ */
 RETURN_VALUE evalSymbol(AST_NODE *p) {
     AST_NODE *parent = p;
     while (parent != NULL) {
         SYMBOL_TABLE_NODE *cN = parent->symbolTable;
         while (cN != NULL) {
             if (strcmp(cN->ident, p->data.symbol.name) == 0) {
-                if(cN->type == VARIABLE_TYPE) {
+                if (cN->type == VARIABLE_TYPE) {
                     return evalVariable(cN);
-                } else if(cN->type == ARG_TYPE) {
+                } else if (cN->type == ARG_TYPE) {
                     return evalArg(cN);
                 }
             }
@@ -496,10 +617,15 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
     exit(0);
 }
 
+/**
+ * Evaluates a conditional.
+ * @param p The conditional expression
+ * @return The value of the zero expression of the condition's value was zero, the other one otherwise.
+ */
 RETURN_VALUE evalCond(AST_NODE *p) {
     RETURN_VALUE condition = eval(p->data.condition.cond);
 
-    if(condition.value == 0) {
+    if (condition.value == 0) {
         return eval(p->data.condition.zero);
     } else {
         return eval(p->data.condition.nonzero);
@@ -507,11 +633,11 @@ RETURN_VALUE evalCond(AST_NODE *p) {
 
 }
 
-//
-// evaluate an abstract syntax tree
-//
-// p points to the root
-//
+/**
+ * Evaluates the given expression
+ * @param p The expression to evaluate
+ * @return
+ */
 RETURN_VALUE eval(AST_NODE *p) {
 
     RETURN_VALUE result = (RETURN_VALUE) {NO_TYPE, 0.0};
@@ -519,7 +645,6 @@ RETURN_VALUE eval(AST_NODE *p) {
         return result;
     }
 
-// TBD: implement
     if (p->type == NUM_TYPE) {
         result = p->data.number.value;
     }
@@ -532,13 +657,22 @@ RETURN_VALUE eval(AST_NODE *p) {
         result = evalSymbol(p);
     }
 
-    if(p->type == COND_TYPE) {
+    if (p->type == COND_TYPE) {
         result = evalCond(p);
     }
 
     return result;
 }
 
+/**
+ * Creates a variable with the given type, name and value<br/>
+ * If type is null, the variable will be set to NO_TYPE<br/>
+ * If the s_expr is a call to read or rand, evaluate the function and set the variables value to a number containing the result.
+ * @param type The type of the variable
+ * @param symbol The name of the variable
+ * @param s_expr The value of the variable
+ * @return A symbol table node representing the variable
+ */
 SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
     SYMBOL_TABLE_NODE *p = malloc(sizeof(SYMBOL_TABLE_NODE));
 
@@ -561,12 +695,12 @@ SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
     p->next = NULL;
     p->type = VARIABLE_TYPE;
 
-    if(s_expr->type == FUNC_TYPE) {
+    if (s_expr->type == FUNC_TYPE) {
         OPER_TYPE oper = resolveFunc(s_expr->data.function.name);
-        if(oper == READ_OPER || oper == RAND_OPER) {
+        if (oper == READ_OPER || oper == RAND_OPER) {
             AST_NODE *newVal;
             RETURN_VALUE readVal = eval(s_expr);
-            if(readVal.type == INTEGER_TYPE) {
+            if (readVal.type == INTEGER_TYPE) {
                 newVal = int_number((int) readVal.value);
             } else {
                 newVal = real_number(readVal.value);
@@ -579,15 +713,21 @@ SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
     return p;
 }
 
+/**
+ * Adds the given symbol to the beginning of the given list
+ * @param let_list The list to add to
+ * @param let_elem The element to add
+ * @return The head of the list
+ */
 SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NODE *let_elem) {
     if (let_elem == NULL) {
         return let_list;
     }
     if (let_elem->val == NULL) {
-        if(let_elem->type == VARIABLE_TYPE) {
+        if (let_elem->type == VARIABLE_TYPE) {
             return let_list;
         } else {
-            if(let_elem->next == NULL) {
+            if (let_elem->next == NULL) {
                 let_elem->next = let_list;
             } else {
                 addSymbolToList(let_list, let_elem->next);
@@ -607,6 +747,13 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
     }
 }
 
+/**
+ * Sets the symbol table of the given expression<br/>
+ * The parent of all the values in the symbol table is set to the expression
+ * @param let_section The symbol table
+ * @param s_expr The expression
+ * @return The given expression
+ */
 AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr) {
     if (s_expr == NULL) {
         return NULL;
@@ -622,6 +769,11 @@ AST_NODE *setSymbolTable(SYMBOL_TABLE_NODE *let_section, AST_NODE *s_expr) {
     return s_expr;
 }
 
+/**
+ * Creates a symbol ast node
+ * @param symb The symbol
+ * @return A SYMBOL_TYPE ast node
+ */
 AST_NODE *symbol(char *symb) {
     AST_NODE *p = calloc(1, sizeof(AST_NODE));
     if (p == NULL)
@@ -633,6 +785,10 @@ AST_NODE *symbol(char *symb) {
     return p;
 }
 
+/**
+ * Frees a given symbol table list recursively
+ * @param node
+ */
 void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
     if (node == NULL) {
         return;
@@ -643,8 +799,12 @@ void freeSymbolTable(SYMBOL_TABLE_NODE *node) {
     free(node);
 }
 
-
-
+/**
+ * Searches for a symbol in a symbol table
+ * @param symbolTable
+ * @param symbol
+ * @return The found symbol, or null
+ */
 SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE *symbol) {
     if (symbol == NULL) {
         return NULL;
@@ -659,6 +819,12 @@ SYMBOL_TABLE_NODE *findSymbol(SYMBOL_TABLE_NODE *symbolTable, SYMBOL_TABLE_NODE 
     return NULL;
 }
 
+/**
+ * Adds a symbol to the given argument list at the head of the list.
+ * @param toAdd
+ * @param list
+ * @return The head of the list
+ */
 AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list) {
     if (toAdd == NULL) {
         return list;
@@ -668,10 +834,16 @@ AST_NODE *addNodeToList(AST_NODE *toAdd, AST_NODE *list) {
     return toAdd;
 }
 
+/**
+ * Checks if a symbol is already an argument in an argument list
+ * @param arg
+ * @param arg_list
+ * @return
+ */
 bool argInArgList(char *arg, SYMBOL_TABLE_NODE *arg_list) {
     SYMBOL_TABLE_NODE *cN = arg_list;
-    while(cN != NULL) {
-        if(strcmp(arg, cN->ident) == 0) {
+    while (cN != NULL) {
+        if (strcmp(arg, cN->ident) == 0) {
             return true;
         }
         cN = cN->next;
@@ -679,9 +851,14 @@ bool argInArgList(char *arg, SYMBOL_TABLE_NODE *arg_list) {
     return false;
 }
 
+/**
+ * Constructs an argument list with one element
+ * @param symbol The argument symbol
+ * @return
+ */
 SYMBOL_TABLE_NODE *createArgList(char *symbol) {
     SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
-    if(!p) {
+    if (!p) {
         yyerror("Out of memory");
     }
     p->ident = calloc(1 + strlen(symbol), sizeof(char));
@@ -690,11 +867,17 @@ SYMBOL_TABLE_NODE *createArgList(char *symbol) {
     return p;
 }
 
+/**
+ * Adds a symbol to the front of an existing arg list
+ * @param symbol
+ * @param arg_list
+ * @return
+ */
 SYMBOL_TABLE_NODE *addSymbolToArgList(char *symbol, SYMBOL_TABLE_NODE *arg_list) {
-    if(arg_list == NULL) {
+    if (arg_list == NULL) {
         return createArgList(symbol);
     }
-    if(argInArgList(symbol, arg_list)) {
+    if (argInArgList(symbol, arg_list)) {
         return arg_list;
     }
     SYMBOL_TABLE_NODE *arg = createArgList(symbol);
@@ -702,19 +885,27 @@ SYMBOL_TABLE_NODE *addSymbolToArgList(char *symbol, SYMBOL_TABLE_NODE *arg_list)
     return arg;
 }
 
-SYMBOL_TABLE_NODE *createLambda(char* type, char*ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body) {
+/**
+ * Creates a user defined function node.
+ * @param type
+ * @param ident
+ * @param argList
+ * @param body
+ * @return
+ */
+SYMBOL_TABLE_NODE *createLambda(char *type, char *ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body) {
     SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
-    if(!p) {
+    if (!p) {
         yyerror("Out of memory");
     }
-    if(!body) {
+    if (!body) {
         yyerror("No function body");
     }
-    if(type == NULL) {
+    if (type == NULL) {
         p->val_type = NO_TYPE;
-    } else if(strcmp(type, "real") == 0) {
+    } else if (strcmp(type, "real") == 0) {
         p->val_type = REAL_TYPE;
-    } else if(strcmp(type, "integer") == 0) {
+    } else if (strcmp(type, "integer") == 0) {
         p->val_type = INTEGER_TYPE;
     }
 

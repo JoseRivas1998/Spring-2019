@@ -1,3 +1,9 @@
+/**
+* Name: Jose de Jesus Rodriguez Rivas
+* Lab: ciLisp
+* Date: 04/24/19
+**/
+
 #include "ciLisp.h"
 
 #define NaN NAN
@@ -336,7 +342,12 @@ SYMBOL_TABLE_NODE *findLambda(char *lambda, AST_NODE *p) {
 void pushToStack(SYMBOL_TABLE_NODE *arg, AST_NODE *val) {
     STACK_NODE *newHead = calloc(1, sizeof(STACK_NODE));
     newHead->next = arg->stack;
-    newHead->val = val;
+    RETURN_VALUE actualValue = eval(val);
+    if(actualValue.type == INTEGER_TYPE) {
+        newHead->val = int_number((int) actualValue.value);
+    } else {
+        newHead->val = real_number((actualValue.value));
+    }
     arg->stack = newHead;
 }
 
@@ -345,6 +356,7 @@ bool popFromStack(SYMBOL_TABLE_NODE *arg) {
         return false;
     }
     STACK_NODE *newHead = arg->stack->next;
+    freeNode(arg->stack->val); // when pushing, this was created
     free(arg->stack);
     arg->stack = newHead;
     return true;
@@ -432,6 +444,7 @@ RETURN_VALUE evalFunc(AST_NODE *p) {
         case READ_OPER:
         case RAND_OPER:
             evalParamless(&result, op);
+            break;
         case CUSTOM_FUNC:
             evalCustom(&result, p);
             break;

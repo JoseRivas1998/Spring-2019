@@ -19,6 +19,7 @@ void yyerror(char *s) {
 // find out which function it is
 //
 
+
 char *func[] = {
         "neg",
         "abs",
@@ -468,15 +469,15 @@ bool pushArgsToStack(AST_NODE *lambda, AST_NODE *opList) {
         yyerror("Too many arguments");
         return false;
     }
-    if (currentArg != NULL) {
-        while (currentArg != NULL) {
-            if (currentArg->type == ARG_TYPE) {
-                yyerror("No enough arguments");
-                return false;
-            }
-            currentArg = currentArg->next;
+
+    while (currentArg != NULL) {
+        if (currentArg->type == ARG_TYPE) {
+            yyerror("No enough arguments");
+            return false;
         }
+        currentArg = currentArg->next;
     }
+
     return true;
 }
 
@@ -625,12 +626,9 @@ RETURN_VALUE evalSymbol(AST_NODE *p) {
 RETURN_VALUE evalCond(AST_NODE *p) {
     RETURN_VALUE condition = eval(p->data.condition.cond);
 
-    if (condition.value == 0) {
+    if (condition.value == 0)
         return eval(p->data.condition.zero);
-    } else {
-        return eval(p->data.condition.nonzero);
-    }
-
+    return eval(p->data.condition.nonzero);
 }
 
 /**
@@ -674,12 +672,13 @@ RETURN_VALUE eval(AST_NODE *p) {
  * @return A symbol table node representing the variable
  */
 SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
-    SYMBOL_TABLE_NODE *p = malloc(sizeof(SYMBOL_TABLE_NODE));
+    SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
 
     if (p == NULL) {
         yyerror("out of memory");
     }
 
+    //TODO: Edit to tokens because real and integer are keywords and hold no value
     if (type == NULL) {
         p->val_type = NO_TYPE;
     } else if (strcmp(type, "real") == 0) {
@@ -692,7 +691,6 @@ SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
 
     p->ident = symbol;
     p->val = s_expr;
-    p->next = NULL;
     p->type = VARIABLE_TYPE;
 
     if (s_expr->type == FUNC_TYPE) {
@@ -723,18 +721,18 @@ SYMBOL_TABLE_NODE *addSymbolToList(SYMBOL_TABLE_NODE *let_list, SYMBOL_TABLE_NOD
     if (let_elem == NULL) {
         return let_list;
     }
+
     if (let_elem->val == NULL) {
         if (let_elem->type == VARIABLE_TYPE) {
             return let_list;
+        } else if (let_elem->next == NULL) {
+            let_elem->next = let_list;
         } else {
-            if (let_elem->next == NULL) {
-                let_elem->next = let_list;
-            } else {
-                addSymbolToList(let_list, let_elem->next);
-            }
-            return let_elem;
+            addSymbolToList(let_list, let_elem->next);
         }
+        return let_elem;
     }
+
     SYMBOL_TABLE_NODE *symbol = findSymbol(let_list, let_elem);
     if (symbol == NULL) {
         let_elem->next = let_list;

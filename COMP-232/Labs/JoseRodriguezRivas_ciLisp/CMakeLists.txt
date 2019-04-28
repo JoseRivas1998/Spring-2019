@@ -4,7 +4,7 @@ project(cilisp)
 
 set(CMAKE_C_STANDARD 11)
 
-SET(CMAKE_C_FLAGS "-m64 -g -O0 -D_DEBUG -Wall")
+SET(CMAKE_C_FLAGS "-m64 -g -O0 -D_DEBUG -Wall -Wextra -Wpedantic")
 
 set(SOURCE_FILES
         ciLispSrc/ciLisp.c

@@ -1,0 +1,173 @@
+\documentclass[12pt]{article}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsthm}
+
+\begin{document}
+José de Jesus Rodriguez Rivas
+
+MATH 300-01
+
+\newcommand{\contradiction}{\Rightarrow\Leftarrow}
+
+\begin{center}
+Proof Portfolio
+\end{center}
+\section{Proof By Induction}
+
+Show that
+$$\sum_{i = 1}^{n} i! \cdot i = (n + 1)! - 1$$
+
+\begin{proof}
+By Induction:
+
+Base Case: $n = 1$
+
+LHS: $\sum_{i=1}^{1} i! \cdot i = 1! \cdot 1 = 1$
+
+RHS: $(1 +1)! - 1 = 2! - 1 = 2 - 1 = 1$
+
+$\text{LHS} = \text{RHS}$
+
+Inductive Step: 
+
+Assume 
+$$\sum_{i = 1}^{n} i! \cdot i = (n + 1)! - 1$$
+
+Show 
+$$\sum_{i = 1}^{n+1} i! \cdot i = (n + 2)! - 1$$
+
+$$\sum_{i = 1}^{n+1} i! \cdot i = \sum_{i = 1}^{n} i! \cdot i + (n + 1)! (n+1)$$
+$$= (n+1)!-1 + (n + 1)!(n+1)\text{ By Induction Hyp.}$$
+$$= (n+1)! + (n+1)!(n+1)-1$$
+$$= (n+1)!(1 + (n+1)) - 1$$
+$$= (n+1)!(n+2)-1$$
+$$= (n+2)! - 1$$
+\end{proof}
+
+\newpage
+\begin{flushleft}
+Prove that if $h > -1$, then $1 + nh \leq (h+1)^n$ for all non-negative integers $n$.
+\end{flushleft}
+\begin{proof}
+By Induction.
+
+Base Case:
+$$n = 0$$
+$$LHS = 1 + 0\cdot h = 1$$
+$$RHS = (h+1)^0 = 1$$
+$$LHS \leq RHS$$
+
+Inductive Step:
+
+Assume $1 + kh \leq (1+h)^k$, for $k = n$
+
+Show $1 + h(k + 1) \leq (1+h)^{k+1}$
+
+RHS:
+$$(1+h)^{k+1} = (1+h)(1+h)^k$$
+By Induction Hypothesis:
+$$(1+h)^{k+1} \geq (1+h)(1+nh)$$
+$$(1+h)^{k+1} \geq 1+nh+h+nh^2$$
+$$(1+h)^{k+1} \geq 1+h(n+1)+nh^2$$
+
+If LHS $\leq$ RHS, then $\text{RHS} - \text{LHS} \geq 0$. 
+
+Lowest possible RHS = $1+h(n+1)+nh^2$
+$$LHS - RHS = 1 + h(n + 1) - 1+h(n+1)+nh^2 = nh^2$$
+
+Making $nh^2$ the lowest value for $\text{RHS} - \text{LHS}$.
+
+Since $n \geq 0$ and $h^2 \geq 0$, then  $\text{RHS} - \text{LHS} \geq 0$
+
+
+$$\therefore 1 + h(n + 1) \leq (1+h)^{k+1}$$
+
+\end{proof}
+
+\newpage
+\section{Direct Proof}
+
+Prove:
+$$\binom{2n}{n} = \frac{2^n \cdot (2n-1)!!}{n!}$$
+\begin{proof}
+Direct.
+
+First, show that $(2n-1)!! \cdot 2^n \cdot n! = (2n)!$
+$$(2n-1)!! \cdot 2^n \cdot n! = [(2n-1)(2n-3)...1][2(n)2(n-1)2(n-2)...2(1)]$$
+$$(2n-1)!! \cdot 2^n \cdot n! = [(2n-1)(2n-3)...1][(2n)(2n-2)(2n-4)...2]$$
+$$(2n-1)!! \cdot 2^n \cdot n! = (2n)(2n-1)(2n-2)(2n-3)(2n-4)...1$$
+$$(2n-1)!! \cdot 2^n \cdot n! = (2n)!$$
+
+$$\binom{2n}{n} = \frac{(2n)!}{n!(2n - n)!}$$
+$$\binom{2n}{n} = \frac{(2n)!}{n! \cdot n!}$$
+
+By Above Derivation:
+$$\binom{2n}{n} = \frac{n! \cdot 2^n \cdot (2n-1)!!}{n! \cdot n!}$$
+$$\binom{2n}{n} = \frac{2^n \cdot (2n-1)!!}{n!}$$
+
+\end{proof}
+
+\newpage
+Show that
+$$\sum_{r=0}^n r \binom{n}{r} = n\cdot 2^{n-1}$$
+
+\begin{proof}
+By Binomial Theorem Corollary:
+$$\sum_{r=0}^n \binom{n}{r}= 2^n$$
+$\binom{n}{r}$ Represents the number of subsets of size $r$ of $\{ 1, 2, ..., n\}$. The Binomial Theorem Corollary is saying that there are $2^n$ of these subsets. So, the sum of the sizes of the subsets is
+$$\sum_{r=1}^n\binom{n}{r}\cdot r\text{, }r\text{ starts at 1 because when }r=0\text{, the size of the subset is also 0.}$$
+Each element is in $2^{n-1}$ subsets, and so adds $2^{n-1}$ to the total sum, making the total sum: 
+$$n2^{n-1}$$
+\end{proof}
+
+\newpage
+\section{Proof By Contradiction}
+
+Show that any simple, connected graph with 31 edges and 12 vertices is not planar.
+
+\begin{proof}
+Assume to the contrary that the graph is planar.
+
+If we let $r$ be the number of regions in the graph, $p$ be the number of vertices in the graph, and $q$ be the number of edges.
+
+By Euler's Formula:
+$$r = 2 - p + q$$
+$$r = 2 - 12 + 31$$
+$$r = 21$$
+
+So there are 21 regions in the graph.
+
+The minimum degree per region in this graph is 3, so the minimum sum of the degrees of all the regions is
+$$3r = 3 \cdot 21 = 63$$
+
+By the Second Handshaking Lemma:
+$$2q = \text{the sum of the degree of all the regions.}$$
+$$2q = 2 \cdot 31$$
+$$2q = 62$$
+
+So the sum of the degrees must be at least 63, but is equal to 62. $\contradiction$
+
+\end{proof}
+\newpage
+\begin{flushleft}
+Show that $G$ is a simple graph with $p \geq 2$ vertices and $\text{deg}(v)\geq\frac{p - 1}{2}$ for each vertex $v$ in $G$. Prove $G$ is connected.
+\end{flushleft}
+
+\begin{proof}
+Assume to the contrary that $G$ has 2 distinct connected components $C_1$ and $C_2$.
+
+$C_1$ must have a vertex $v$, and at least $\frac{p-1}{2}$ other vertices, since they are connected to $v$. 
+
+$$\therefore C_1 \text{ has } 1 + \frac{p-1}{2} = \frac{p+1}{2} \text{ vertices.}$$
+
+A similar argument can be made for $C_2$ having $\frac{p+1}{2}$ vertices.
+
+Since $C_1$ and $C_2$ are distinct components that make up $G$, the sum of the number of vertices in $C_1$ and $C_2$ must equal the number of vertices in $G$.
+$$\therefore p = \frac{p+1}{2} + \frac{p + 1}{2}$$
+$$p = p + 1 \contradiction$$
+
+\end{proof}
+
+\end{document}

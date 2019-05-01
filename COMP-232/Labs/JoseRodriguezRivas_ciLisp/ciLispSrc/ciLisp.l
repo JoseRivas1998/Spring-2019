@@ -46,10 +46,14 @@ symbol {letter}+
     return LET;
     }
 
-"integer"|"real" {
-    yylval.sval = (char *) malloc(strlen(yytext)*sizeof(char));
-    strcpy(yylval.sval, yytext);
-    return TYPE;
+"integer" {
+    fprintf(stderr, "lex: INTEGER\n");
+    return INTEGER;
+    }
+
+"real" {
+    fprintf(stderr, "lex: REAL\n");
+    return REAL;
     }
 
 "lambda" {

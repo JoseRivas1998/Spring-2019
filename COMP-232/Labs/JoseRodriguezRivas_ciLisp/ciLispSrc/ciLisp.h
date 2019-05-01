@@ -133,7 +133,7 @@ RETURN_VALUE eval(AST_NODE *ast);
  * @param s_expr
  * @return
  */
-SYMBOL_TABLE_NODE *createSymbol(char* type, char *symbol, AST_NODE *s_expr);
+SYMBOL_TABLE_NODE *createSymbol(DATA_TYPE type, char *symbol, AST_NODE *s_expr);
 
 /**
  * Adds let_elem to the given list
@@ -156,7 +156,7 @@ SYMBOL_TABLE_NODE *createArgList(char *symbol);
 
 SYMBOL_TABLE_NODE *addSymbolToArgList(char *symbol, SYMBOL_TABLE_NODE *arg_list);
 
-SYMBOL_TABLE_NODE *createLambda(char* type, char*ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body);
+SYMBOL_TABLE_NODE *createLambda(DATA_TYPE type, char*ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body);
 
 
 

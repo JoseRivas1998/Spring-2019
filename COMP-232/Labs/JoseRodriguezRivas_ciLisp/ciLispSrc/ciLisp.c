@@ -502,6 +502,9 @@ void popArgsFromStack(AST_NODE *lambda) {
  */
 void evalCustom(RETURN_VALUE *out, AST_NODE *p) {
     SYMBOL_TABLE_NODE *lambdaNode = findLambda(p->data.function.name, p);
+    if(lambdaNode == NULL) {
+        yyerror("Function not found");
+    }
     AST_NODE *lambdaValue = lambdaNode->val;
     pushArgsToStack(lambdaValue, p->data.function.opList);
     *out = eval(lambdaValue);
@@ -671,23 +674,13 @@ RETURN_VALUE eval(AST_NODE *p) {
  * @param s_expr The value of the variable
  * @return A symbol table node representing the variable
  */
-SYMBOL_TABLE_NODE *createSymbol(char *type, char *symbol, AST_NODE *s_expr) {
+SYMBOL_TABLE_NODE *createSymbol(DATA_TYPE type, char *symbol, AST_NODE *s_expr) {
     SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
 
     if (p == NULL) {
         yyerror("out of memory");
     }
-
-    //TODO: Edit to tokens because real and integer are keywords and hold no value
-    if (type == NULL) {
-        p->val_type = NO_TYPE;
-    } else if (strcmp(type, "real") == 0) {
-        p->val_type = REAL_TYPE;
-    } else if (strcmp(type, "integer") == 0) {
-        p->val_type = INTEGER_TYPE;
-    } else {
-        p->val_type = NO_TYPE;
-    }
+    p->val_type = type;
 
     p->ident = symbol;
     p->val = s_expr;
@@ -891,7 +884,7 @@ SYMBOL_TABLE_NODE *addSymbolToArgList(char *symbol, SYMBOL_TABLE_NODE *arg_list)
  * @param body
  * @return
  */
-SYMBOL_TABLE_NODE *createLambda(char *type, char *ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body) {
+SYMBOL_TABLE_NODE *createLambda(DATA_TYPE type, char *ident, SYMBOL_TABLE_NODE *argList, AST_NODE *body) {
     SYMBOL_TABLE_NODE *p = calloc(1, sizeof(SYMBOL_TABLE_NODE));
     if (!p) {
         yyerror("Out of memory");
@@ -899,13 +892,8 @@ SYMBOL_TABLE_NODE *createLambda(char *type, char *ident, SYMBOL_TABLE_NODE *argL
     if (!body) {
         yyerror("No function body");
     }
-    if (type == NULL) {
-        p->val_type = NO_TYPE;
-    } else if (strcmp(type, "real") == 0) {
-        p->val_type = REAL_TYPE;
-    } else if (strcmp(type, "integer") == 0) {
-        p->val_type = INTEGER_TYPE;
-    }
+
+    p->val_type = type;
 
     p->type = LAMBDA_TYPE;
     p->ident = calloc(strlen(ident) + 1, sizeof(char));

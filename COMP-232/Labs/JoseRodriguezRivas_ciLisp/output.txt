@@ -43,7 +43,7 @@ read := 4
 120.00
 > ( ( let ( integer f lambda ( n ) ( cond ( equal n 1 ) ( 1 ) ( mult n ( f ( sub n 1 ) ) ) ) ) ) ( f ( add 3 2 ) ) )
 120.00
-> ( ( let ( real f lambda (x) ( pow x 2 ) ) ( real g lambda (x) ( add x 0 )  ) ( real h lambda (x) ( add (f x) (g x) ) ) ) ( h 3 ) )
+> ( ( let ( real f lambda (x) ( pow x 2 ) ) ( real g lambda (x) ( x )  ) ( real h lambda (x) ( add (f x) (g x) ) ) ) ( h 3 ) )
 12.00
 > ( ( let ( real f lambda (x) ( pow x 2 ) ) ( real g lambda (x) ( f ( add 1 x ) ) ) ) ( g 3 ) )
 16.00

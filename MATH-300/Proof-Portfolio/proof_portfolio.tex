@@ -37,13 +37,14 @@ $$\sum_{i = 1}^{n} i! \cdot i = (n + 1)! - 1$$
 
 Show 
 $$\sum_{i = 1}^{n+1} i! \cdot i = (n + 2)! - 1$$
-
-$$\sum_{i = 1}^{n+1} i! \cdot i = \sum_{i = 1}^{n} i! \cdot i + (n + 1)! (n+1)$$
-$$= (n+1)!-1 + (n + 1)!(n+1)\text{ By Induction Hyp.}$$
-$$= (n+1)! + (n+1)!(n+1)-1$$
-$$= (n+1)!(1 + (n+1)) - 1$$
-$$= (n+1)!(n+2)-1$$
-$$= (n+2)! - 1$$
+\begin{align*}
+\sum_{i = 1}^{n+1} i! \cdot i &= \sum_{i = 1}^{n} i! \cdot i + (n + 1)! (n+1)\\
+&= (n+1)!-1 + (n + 1)!(n+1)\text{ By Induction Hyp.}\\
+&= (n+1)! + (n+1)!(n+1)-1\\
+&= (n+1)!(1 + (n+1)) - 1\\
+&= (n+1)!(n+2)-1\\
+&= (n+2)! - 1
+\end{align*}
 \end{proof}
 
 \newpage
@@ -95,17 +96,22 @@ $$\binom{2n}{n} = \frac{2^n \cdot (2n-1)!!}{n!}$$
 Direct.
 
 First, show that $(2n-1)!! \cdot 2^n \cdot n! = (2n)!$
-$$(2n-1)!! \cdot 2^n \cdot n! = [(2n-1)(2n-3)...1][2(n)2(n-1)2(n-2)...2(1)]$$
-$$(2n-1)!! \cdot 2^n \cdot n! = [(2n-1)(2n-3)...1][(2n)(2n-2)(2n-4)...2]$$
-$$(2n-1)!! \cdot 2^n \cdot n! = (2n)(2n-1)(2n-2)(2n-3)(2n-4)...1$$
-$$(2n-1)!! \cdot 2^n \cdot n! = (2n)!$$
-
-$$\binom{2n}{n} = \frac{(2n)!}{n!(2n - n)!}$$
-$$\binom{2n}{n} = \frac{(2n)!}{n! \cdot n!}$$
+\begin{align*}
+(2n-1)!! \cdot 2^n \cdot n! &= [(2n-1)(2n-3)...1][2(n)2(n-1)2(n-2)...2(1)]\\
+&= [(2n-1)(2n-3)...1][(2n)(2n-2)(2n-4)...2]\\
+&= (2n)(2n-1)(2n-2)(2n-3)(2n-4)...1\\
+&= (2n)!
+\end{align*}
+\begin{align*}
+\binom{2n}{n} &= \frac{(2n)!}{n!(2n - n)!}\\
+&= \frac{(2n)!}{n! \cdot n!}
+\end{align*}
 
 By Above Derivation:
-$$\binom{2n}{n} = \frac{n! \cdot 2^n \cdot (2n-1)!!}{n! \cdot n!}$$
-$$\binom{2n}{n} = \frac{2^n \cdot (2n-1)!!}{n!}$$
+\begin{align*}
+\binom{2n}{n} &= \frac{n! \cdot 2^n \cdot (2n-1)!!}{n! \cdot n!}\\
+&= \frac{2^n \cdot (2n-1)!!}{n!}
+\end{align*}
 
 \end{proof}
 
@@ -133,9 +139,11 @@ Assume to the contrary that the graph is planar.
 If we let $r$ be the number of regions in the graph, $p$ be the number of vertices in the graph, and $q$ be the number of edges.
 
 By Euler's Formula:
-$$r = 2 - p + q$$
-$$r = 2 - 12 + 31$$
-$$r = 21$$
+\begin{align*}
+r &= 2 - p + q\\
+&= 2 - 12 + 31\\
+&= 21
+\end{align*}
 
 So there are 21 regions in the graph.
 

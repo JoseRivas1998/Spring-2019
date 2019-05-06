@@ -47,7 +47,10 @@ $$\sum_{i = 1}^{n+1} i! \cdot i = (n + 2)! - 1$$
 \end{align*}
 \end{proof}
 
-\newpage
+\par
+I chose this proof as the first induction proof since it is pretty straight forward with how induction works. The challenge in this proof came down to seeing the associativity of the problem, factoring out $(n+1)!$ correctly. This allowed me to use the definition of factorial to then get $(n+2)!$.
+
+
 \begin{flushleft}
 Prove that if $h > -1$, then $1 + nh \leq (h+1)^n$ for all non-negative integers $n$.
 \end{flushleft}
@@ -87,6 +90,9 @@ $$\therefore 1 + h(n + 1) \leq (1+h)^{k+1}$$
 
 \end{proof}
 
+\par
+The use of induction is not obvious in this one. I chose this one because I find induction with inequalities specifically challenging. I had to really think about what it means for one thing to be greater than or equal to the other. 
+
 \newpage
 \section{Direct Proof}
 
@@ -102,6 +108,8 @@ First, show that $(2n-1)!! \cdot 2^n \cdot n! = (2n)!$
 &= (2n)(2n-1)(2n-2)(2n-3)(2n-4)...1\\
 &= (2n)!
 \end{align*}
+
+Now, apply definition of choose to $\binom{2n}{n}$:
 \begin{align*}
 \binom{2n}{n} &= \frac{(2n)!}{n!(2n - n)!}\\
 &= \frac{(2n)!}{n! \cdot n!}

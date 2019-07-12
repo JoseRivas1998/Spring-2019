@@ -123,6 +123,9 @@ By Above Derivation:
 
 \end{proof}
 
+\par
+This proof was particularly interesting because it required a strong understanding of the double factorial and how to use it in this problem. I did this in two parts because I wanted to make the proof more readable and easier to follow. Finding out what to prove in the first part was the particularly tricky part of this proof.
+
 \newpage
 Show that
 $$\sum_{r=0}^n r \binom{n}{r} = n\cdot 2^{n-1}$$
@@ -135,6 +138,9 @@ $$\sum_{r=1}^n\binom{n}{r}\cdot r\text{, }r\text{ starts at 1 because when }r=0\
 Each element is in $2^{n-1}$ subsets, and so adds $2^{n-1}$ to the total sum, making the total sum: 
 $$n2^{n-1}$$
 \end{proof}
+
+\par
+I chose this proof because it required an understanding of what the equation was trying to count and how that relates to what the binomial coefficients are counting. Figuring these out was difficult, but once it clicked it all made sense.
 
 \newpage
 \section{Proof By Contradiction}
@@ -166,6 +172,10 @@ $$2q = 62$$
 So the sum of the degrees must be at least 63, but is equal to 62. $\contradiction$
 
 \end{proof}
+
+\par
+This proof by contradiction is interesting because it requires knowledge on how planar graphs work, and knowing both Euler's formula and the Second Handshaking Lemma. It is a good example of finding two true facts about a mathematical object that must be true given certain parameters, and seeing how they contradict when assuming to the contrary.
+
 \newpage
 \begin{flushleft}
 Show that $G$ is a simple graph with $p \geq 2$ vertices and $\text{deg}(v)\geq\frac{p - 1}{2}$ for each vertex $v$ in $G$. Prove $G$ is connected.
@@ -185,5 +195,8 @@ $$\therefore p = \frac{p+1}{2} + \frac{p + 1}{2}$$
 $$p = p + 1 \contradiction$$
 
 \end{proof}
+
+\par
+In this proof, an understanding of the degree of a graph and what it means to not be connected is crucial. When the understanding came that a graph that isn't connected must have distinct connected components, I was able to use that as my contradictory assumption. From there, showing how many vertices each component has required critical thinking, and when they finally added up the statement at the end is so obviously contradictory.
 
 \end{document}
